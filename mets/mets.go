@@ -58,8 +58,8 @@ type FLocat struct {
 
 // File represents a mets:file entry
 type File struct {
-	GroupID, MIMEType, ID string
-	FLocat                FLocat
+	MIMEType, ID string
+	FLocat       FLocat
 }
 
 func newFileFromNode(n *xmlquery.Node) File {
@@ -74,8 +74,6 @@ func newFileFromNode(n *xmlquery.Node) File {
 			file.ID = i.Value()
 		case "MIMETYPE":
 			file.MIMEType = i.Value()
-		case "GROUPID":
-			file.GroupID = i.Value()
 		}
 	}
 	file.FLocat = newFLocatFromNode(xmlquery.FindOne(n, "./mets:FLocat"))
@@ -92,7 +90,7 @@ func newFLocatFromNode(n *xmlquery.Node) FLocat {
 		switch i.LocalName() {
 		case "LOCTYPE":
 			flocat.Type = i.Value()
-		case "xlink:href":
+		case "href":
 			flocat.URL = i.Value()
 		}
 	}
