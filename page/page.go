@@ -92,7 +92,7 @@ func (r Region) Lines() []TextLine {
 	tls := xmlquery.Find(r.node, "./TextLine")
 	var lines []TextLine
 	for _, tl := range tls {
-		lines = append(lines, newTextLine(tl))
+		lines = append(lines, TextLine{tl, getID(tl)})
 	}
 	return lines
 }
@@ -151,8 +151,8 @@ func newRegion(root, node *xmlquery.Node) (Region, error) {
 
 // TextLine represents a line of text in the page XML file.
 type TextLine struct {
-	node                        *xmlquery.Node
-	ID, PrimaryLanguage, Custom string
+	node *xmlquery.Node
+	ID   string
 }
 
 // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode element
@@ -161,20 +161,47 @@ func (l TextLine) TextEquivUnicodeAt(i int) (string, bool) {
 	return textEquivTypeUnicodeAt(l.node, i)
 }
 
-func newTextLine(node *xmlquery.Node) TextLine {
-	textLine := TextLine{node: node}
+// Words returns all words in a line.
+func (l TextLine) Words() []Word {
+	wds := xmlquery.Find(l.node, "./Word")
+	var words []Word
+	for _, w := range wds {
+		words = append(words, Word{w, getID(w)})
+	}
+	return words
+}
+
+// FindWordByID searches for a line with the given ID.
+func (l TextLine) FindWordByID(id string) (Word, bool) {
+	for _, word := range l.Words() {
+		if word.ID == id {
+			return word, true
+		}
+	}
+	return Word{}, false
+}
+
+// Word represents a word on a line.
+type Word struct {
+	node *xmlquery.Node
+	ID   string
+}
+
+// TextEquivUnicodeAt returns the i-th TextEquiv/Unicode element
+// (the indexing is zero-based).
+func (w Word) TextEquivUnicodeAt(i int) (string, bool) {
+	return textEquivTypeUnicodeAt(w.node, i)
+}
+
+func getID(node *xmlquery.Node) string {
 	i := xmlquery.CreateXPathNavigator(node)
 	for i.MoveToNextAttribute() {
 		switch i.LocalName() {
 		case "id":
-			textLine.ID = i.Value()
-		case "primarylanguage":
-			textLine.PrimaryLanguage = i.Value()
-		case "custom":
-			textLine.Custom = i.Value()
+			return i.Value()
 		}
 	}
-	return textLine
+	return ""
 }
 
 func textEquivTypeUnicodeAt(equiv *xmlquery.Node, i int) (string, bool) {
