@@ -2,6 +2,7 @@ github.com/antchfx/xmlquery v0.0.0-20180726134140-2805f22c26c4 h1:ntzM+2QnQcuvKL
 github.com/antchfx/xmlquery v0.0.0-20180726134140-2805f22c26c4/go.mod h1:/+CnyD/DzHRnv2eRxrVbieRU/FIF6N0C+7oTtyUtCKk=
 github.com/antchfx/xpath v0.0.0-20180524052354-077bca4d2caa h1:UgmswLpr8R1msC4cA74MD6zt66QSQckaD5ph7XFyOfY=
 github.com/antchfx/xpath v0.0.0-20180524052354-077bca4d2caa/go.mod h1:Yee4kTMuNiPYJ7nSNorELQMr1J33uOpXDMByNYhvtNk=
+github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 golang.org/x/net v0.0.0-20180821023952-922f4815f713 h1:rMJUcaDGbG+X967I4zGKCq5laYqcGKJmpB+3jhpOhPw=
 golang.org/x/net v0.0.0-20180821023952-922f4815f713/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
