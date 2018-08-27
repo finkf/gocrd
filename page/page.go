@@ -34,24 +34,28 @@ func Open(path string) (Page, error) {
 	if err != nil {
 		return Page{}, err
 	}
-	p := Page{path, root, nil}
-	return p, errors.Wrapf(p.readRegions(), "invalid page XML: %s", path)
+	rs, err := readRegions(root)
+	if err != nil {
+		return Page{}, err
+	}
+	return Page{path, root, rs}, nil
 }
 
-func (p *Page) readRegions() error {
-	regions := xmlquery.Find(p.root, "/*:PcGts/*:Page/*:ReadingOrder/*/*:RegionRefIndexed")
+func readRegions(node *xmlquery.Node) ([]Region, error) {
+	regions := xmlquery.Find(node, "/*:PcGts/*:Page/*:ReadingOrder/*/*:RegionRefIndexed")
+	var res []Region
 	for _, r := range regions {
 		region, err := newRegion(p.root, r)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		p.regions = append(p.regions, region)
+		res = append(res, region)
 	}
 	// sort by region.index
-	sort.Slice(p.regions, func(i, j int) bool {
-		return p.regions[i].index < p.regions[j].index
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].index < p.res[j].index
 	})
-	return nil
+	return res, nil
 }
 
 // FindRegionsByGroupID returns all regions with the given group ID.
