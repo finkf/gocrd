@@ -39,7 +39,7 @@ func Open(path string) (Page, error) {
 }
 
 func (p *Page) readRegions() error {
-	regions := xmlquery.Find(p.root, "/PcGts/Page/ReadingOrder/*/RegionRefIndexed")
+	regions := xmlquery.Find(p.root, "/*:PcGts/*:Page/*:ReadingOrder/*/*:RegionRefIndexed")
 	for _, r := range regions {
 		region, err := newRegion(p.root, r)
 		if err != nil {
