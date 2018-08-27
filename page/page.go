@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strconv"
 
-	xmlquery "github.com/antchfx/xmlquery"
+	"github.com/antchfx/xmlquery"
 	"github.com/pkg/errors"
 )
 

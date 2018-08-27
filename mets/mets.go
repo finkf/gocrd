@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	xmlquery "github.com/antchfx/xmlquery"
+	"github.com/antchfx/xmlquery"
 )
 
 // Mets represents an open METS file.
