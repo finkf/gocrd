@@ -15,7 +15,7 @@ const (
 	MIMEType = "application/alto+xml"
 )
 
-// XPath helper
+// XPath helpers
 var (
 	indexXPath            = xmlpath.MustCompile("@index")
 	regionRefXPath        = xmlpath.MustCompile("@regionRef")
@@ -33,6 +33,14 @@ func linesXPath(id string) *xmlpath.Path {
 
 func regionXPath(id string) *xmlpath.Path {
 	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]", id))
+}
+
+func idFromNode(node *xmlpath.Node) string {
+	id, ok := idXPath.String(node)
+	if !ok {
+		return ""
+	}
+	return id
 }
 
 // Page represents an open page XML file.
@@ -178,10 +186,7 @@ type Line struct {
 // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode entry
 // (indexing is zero-based).
 func (l Line) TextEquivUnicodeAt(pos int) (string, bool) {
-	if i := regionXPath(r.ID).Iter(r.root); i.Next() {
-		return textEquivUnicodeXPath(pos + 1).String(i.Node())
-	}
-	return "", false
+	return textEquivUnicodeXPath(pos + 1).String(l.node)
 }
 
 // // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode element
@@ -221,14 +226,6 @@ func (l Line) TextEquivUnicodeAt(pos int) (string, bool) {
 // func (w Word) TextEquivUnicodeAt(i int) (string, bool) {
 // 	return textEquivTypeUnicodeAt(w.node, i)
 // }
-
-func idFromNode(node *xmlpath.Node) string {
-	id, ok := idXPath.String(node)
-	if !ok {
-		return ""
-	}
-	return id
-}
 
 // func textEquivTypeUnicodeAt(equiv *xmlquery.Node, i int) (string, bool) {
 // 	u := xmlquery.FindOne(equiv, fmt.Sprintf("./TextEquiv[%d]/Unicode", i+1))

@@ -3,6 +3,10 @@ package page
 import "testing"
 
 func TestFindRegionByRefID(t *testing.T) {
+	page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
+	if err != nil {
+		t.Fatalf("got error: %v", err)
+	}
 	tests := []struct {
 		id   string
 		find bool
@@ -16,10 +20,6 @@ func TestFindRegionByRefID(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.id, func(t *testing.T) {
-			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
-			if err != nil {
-				t.Fatalf("got error: %v", err)
-			}
 			region, ok := page.FindRegionByID(tc.id)
 			if ok != tc.find {
 				t.Fatalf("expected ok=%t; got ok=%t", tc.find, ok)
@@ -32,6 +32,10 @@ func TestFindRegionByRefID(t *testing.T) {
 }
 
 func TestRegionTextEquivUnicode(t *testing.T) {
+	page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
+	if err != nil {
+		t.Fatalf("got error: %v", err)
+	}
 	tests := []struct {
 		id, want string
 		idx      int
@@ -42,10 +46,6 @@ func TestRegionTextEquivUnicode(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.id, func(t *testing.T) {
-			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
-			if err != nil {
-				t.Fatalf("got error: %v", err)
-			}
 			region, _ := page.FindRegionByID(tc.id)
 			got, ok := region.TextEquivUnicodeAt(tc.idx)
 			if ok != tc.find {
@@ -59,6 +59,10 @@ func TestRegionTextEquivUnicode(t *testing.T) {
 }
 
 func TestFindLineByID(t *testing.T) {
+	page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
+	if err != nil {
+		t.Fatalf("got error: %v", err)
+	}
 	tests := []struct {
 		refID, lineID string
 		find          bool
@@ -71,10 +75,6 @@ func TestFindLineByID(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.refID+" "+tc.lineID, func(t *testing.T) {
-			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
-			if err != nil {
-				t.Fatalf("got error: %v", err)
-			}
 			r, _ := page.FindRegionByID(tc.refID)
 			l, ok := r.FindLineByID(tc.lineID)
 			if tc.find != ok {
@@ -87,27 +87,28 @@ func TestFindLineByID(t *testing.T) {
 	}
 }
 
-// func TestLineTextEquivUnicode(t *testing.T) {
-// 	tests := []struct {
-// 		refID, lineID, unicode string
-// 	}{
-// 		{"r_1_1", "tl_1", "( 484 )"},
-// 		{"r_2_1", "tl_13", "dienen."},
-// 	}
-// 	for _, tc := range tests {
-// 		t.Run(tc.refID+" "+tc.lineID, func(t *testing.T) {
-// 			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
-// 			if err != nil {
-// 				t.Fatalf("got error: %v", err)
-// 			}
-// 			r, _ := page.FindRegionByRefID(tc.refID)
-// 			l, _ := r.FindLineByID(tc.lineID)
-// 			if got, _ := l.TextEquivUnicodeAt(0); got != tc.unicode {
-// 				t.Fatalf("expceted %q; got %q", tc.unicode, got)
-// 			}
-// 		})
-// 	}
-// }
+func TestLineTextEquivUnicode(t *testing.T) {
+	page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
+	if err != nil {
+		t.Fatalf("got error: %v", err)
+	}
+	tests := []struct {
+		regionID, lineID, want string
+	}{
+		{"r_1_1", "tl_1", "( 484 )"},
+		{"r_2_1", "tl_11", "urtheile werden, eben ſowohl als die alten, zum"},
+		{"r_2_1", "tl_13", "dienen."},
+	}
+	for _, tc := range tests {
+		t.Run(tc.regionID+" "+tc.lineID, func(t *testing.T) {
+			r, _ := page.FindRegionByID(tc.regionID)
+			l, _ := r.FindLineByID(tc.lineID)
+			if got, _ := l.TextEquivUnicodeAt(0); got != tc.want {
+				t.Fatalf("expceted %q; got %q", tc.want, got)
+			}
+		})
+	}
+}
 
 // func TestFindWordByID(t *testing.T) {
 // 	tests := []struct {
