@@ -31,56 +31,34 @@ func TestFindRegionByRefID(t *testing.T) {
 	}
 }
 
-// func TestFindRegionsByGroupID(t *testing.T) {
-// 	tests := []struct {
-// 		groupID string
-// 		len     int
-// 	}{
-// 		{"invalid-ref-id", 0},
-// 		{"ro_1488818689634", 4},
-// 	}
-// 	for _, tc := range tests {
-// 		t.Run(tc.groupID, func(t *testing.T) {
-// 			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
-// 			if err != nil {
-// 				t.Fatalf("got error: %v", err)
-// 			}
-// 			regions := page.FindRegionsByGroupID(tc.groupID)
-// 			if got := len(regions); got != tc.len {
-// 				t.Fatalf("expected %d; got %d", tc.len, got)
-// 			}
-// 		})
-// 	}
-// }
-
-// func TestFindLineByID(t *testing.T) {
-// 	tests := []struct {
-// 		refID, lineID string
-// 		find          bool
-// 	}{
-// 		{"r_1_1", "invalid-line-id", false},
-// 		{"r_1_1", "tl_1", true},
-// 		{"r_1_1", "tl_2", false},
-// 		{"r_2_1", "tl_1", false},
-// 		{"r_2_1", "tl_2", true},
-// 	}
-// 	for _, tc := range tests {
-// 		t.Run(tc.refID+" "+tc.lineID, func(t *testing.T) {
-// 			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
-// 			if err != nil {
-// 				t.Fatalf("got error: %v", err)
-// 			}
-// 			r, _ := page.FindRegionByRefID(tc.refID)
-// 			l, ok := r.FindLineByID(tc.lineID)
-// 			if tc.find != ok {
-// 				t.Fatalf("expected ok=%t; got ok=%t", tc.find, ok)
-// 			}
-// 			if tc.find && l.ID != tc.lineID {
-// 				t.Fatalf("expected %s; got %s", tc.lineID, l.ID)
-// 			}
-// 		})
-// 	}
-// }
+func TestFindLineByID(t *testing.T) {
+	tests := []struct {
+		refID, lineID string
+		find          bool
+	}{
+		{"r_1_1", "invalid-line-id", false},
+		{"r_1_1", "tl_1", true},
+		{"r_1_1", "tl_2", false},
+		{"r_2_1", "tl_1", false},
+		{"r_2_1", "tl_2", true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.refID+" "+tc.lineID, func(t *testing.T) {
+			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
+			if err != nil {
+				t.Fatalf("got error: %v", err)
+			}
+			r, _ := page.FindRegionByID(tc.refID)
+			l, ok := r.FindLineByID(tc.lineID)
+			if tc.find != ok {
+				t.Fatalf("expected ok=%t; got ok=%t", tc.find, ok)
+			}
+			if tc.find && l.ID != tc.lineID {
+				t.Fatalf("expected %s; got %s", tc.lineID, l.ID)
+			}
+		})
+	}
+}
 
 // func TestLineTextEquivUnicode(t *testing.T) {
 // 	tests := []struct {

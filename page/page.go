@@ -1,6 +1,7 @@
 package page // import "github.com/finkf/gocrd/page"
 
 import (
+	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -17,6 +18,7 @@ const (
 var (
 	indexXPath            = xmlpath.MustCompile("@index")
 	regionRefXPath        = xmlpath.MustCompile("@regionRef")
+	idXPath               = xmlpath.MustCompile("@id")
 	regionRefIndexedXPath = xmlpath.MustCompile("/PcGts/Page/ReadingOrder/*/RegionRefIndexed")
 )
 
@@ -44,9 +46,9 @@ func Open(path string) (Page, error) {
 func (p Page) Regions() []Region {
 	var regions []Region
 	for i := regionRefIndexedXPath.Iter(p.root); i.Next(); {
-		region, err := newRegion(i.Node())
-		if err != nil {
-			return nil
+		region, err := newRegion(p.root, i.Node())
+		if err != nil { // skip erroneous nodes
+			continue
 		}
 		regions = append(regions, region)
 	}
@@ -55,17 +57,6 @@ func (p Page) Regions() []Region {
 	})
 	return regions
 }
-
-// // FindRegionsByGroupID returns all regions with the given group ID.
-// func (p Page) FindRegionsByGroupID(groupID string) []Region {
-// 	var regions []Region
-// 	for _, region := range p.regions {
-// 		if region.GroupID == groupID {
-// 			regions = append(regions, region)
-// 		}
-// 	}
-// 	return regions
-// }
 
 // FindRegionByID returns the region with the given refID.
 func (p Page) FindRegionByID(id string) (Region, bool) {
@@ -79,30 +70,34 @@ func (p Page) FindRegionByID(id string) (Region, bool) {
 
 // Region defines a text region in the page XML file.
 type Region struct {
-	GroupID, ID string
-	node        *xmlpath.Node
-	index       int
+	ID    string
+	root  *xmlpath.Node
+	index int
 }
 
-// // Lines Returns all lines in a region.
-// func (r Region) Lines() []TextLine {
-// 	tls := xmlquery.Find(r.node, "./TextLine")
-// 	var lines []TextLine
-// 	for _, tl := range tls {
-// 		lines = append(lines, TextLine{tl, getID(tl)})
-// 	}
-// 	return lines
-// }
+// Lines Returns all lines in a region.
+func (r Region) Lines() []Line {
+	var lines []Line
+	for i := linesXPath(r.ID).Iter(r.root); i.Next(); {
+		node := i.Node()
+		lines = append(lines, Line{node, idFromNode(node)})
+	}
+	return lines
+}
 
-// // FindLineByID searches for a line with the given ID.
-// func (r Region) FindLineByID(id string) (TextLine, bool) {
-// 	for _, line := range r.Lines() {
-// 		if line.ID == id {
-// 			return line, true
-// 		}
-// 	}
-// 	return TextLine{}, false
-// }
+// FindLineByID searches for a line with the given ID.
+func (r Region) FindLineByID(id string) (Line, bool) {
+	for _, line := range r.Lines() {
+		if line.ID == id {
+			return line, true
+		}
+	}
+	return Line{}, false
+}
+
+func linesXPath(id string) *xmlpath.Path {
+	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]/TextLine", id))
+}
 
 // // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode entry
 // // (indexing is zero-based).
@@ -110,12 +105,8 @@ type Region struct {
 // 	return textEquivTypeUnicodeAt(r.node, i)
 // }
 
-// newRegion creates a new region with the according
-// GroupID, RefID and index. The function searches for the
-// according TextRegion node in the page XML file.
-
-func newRegion(node *xmlpath.Node) (Region, error) {
-	region := Region{node: node}
+func newRegion(root, node *xmlpath.Node) (Region, error) {
+	region := Region{root: root}
 	str, ok := indexXPath.String(node)
 	if ok {
 		index, err := strconv.Atoi(str)
@@ -166,11 +157,11 @@ func newRegion(node *xmlpath.Node) (Region, error) {
 // 	return region, nil
 // }
 
-// // TextLine represents a line of text in the page XML file.
-// type TextLine struct {
-// 	node *xmlquery.Node
-// 	ID   string
-// }
+// Line represents a line of text in the page XML file.
+type Line struct {
+	node *xmlpath.Node
+	ID   string
+}
 
 // // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode element
 // // (the indexing is zero-based).
@@ -210,16 +201,13 @@ func newRegion(node *xmlpath.Node) (Region, error) {
 // 	return textEquivTypeUnicodeAt(w.node, i)
 // }
 
-// func getID(node *xmlquery.Node) string {
-// 	i := xmlquery.CreateXPathNavigator(node)
-// 	for i.MoveToNextAttribute() {
-// 		switch i.LocalName() {
-// 		case "id":
-// 			return i.Value()
-// 		}
-// 	}
-// 	return ""
-// }
+func idFromNode(node *xmlpath.Node) string {
+	id, ok := idXPath.String(node)
+	if !ok {
+		return ""
+	}
+	return id
+}
 
 // func textEquivTypeUnicodeAt(equiv *xmlquery.Node, i int) (string, bool) {
 // 	u := xmlquery.FindOne(equiv, fmt.Sprintf("./TextEquiv[%d]/Unicode", i+1))
