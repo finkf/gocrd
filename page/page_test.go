@@ -31,6 +31,33 @@ func TestFindRegionByRefID(t *testing.T) {
 	}
 }
 
+func TestRegionTextEquivUnicode(t *testing.T) {
+	tests := []struct {
+		id, want string
+		idx      int
+		find     bool
+	}{
+		{"r_1_1", "( 484 )", 0, true},
+		{"r_1_1", "( 484 )", 1, false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.id, func(t *testing.T) {
+			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
+			if err != nil {
+				t.Fatalf("got error: %v", err)
+			}
+			region, _ := page.FindRegionByID(tc.id)
+			got, ok := region.TextEquivUnicodeAt(tc.idx)
+			if ok != tc.find {
+				t.Fatalf("expected ok=%t; got ok=%t", tc.find, ok)
+			}
+			if tc.find && got != tc.want {
+				t.Fatalf("expected %s; got %s", region.ID, tc.want)
+			}
+		})
+	}
+}
+
 func TestFindLineByID(t *testing.T) {
 	tests := []struct {
 		refID, lineID string

@@ -95,15 +95,26 @@ func (r Region) FindLineByID(id string) (Line, bool) {
 	return Line{}, false
 }
 
+// TextEquivUnicodeAt returns the i-th TextEquiv/Unicode entry
+// (indexing is zero-based).
+func (r Region) TextEquivUnicodeAt(pos int) (string, bool) {
+	if i := regionXPath(r.ID).Iter(r.root); i.Next() {
+		return textEquivUnicodeXPath(pos + 1).String(i.Node())
+	}
+	return "", false
+}
+
+func textEquivUnicodeXPath(i int) *xmlpath.Path {
+	return xmlpath.MustCompile(fmt.Sprintf("./TextEquiv[%d]/Unicode", i))
+}
+
 func linesXPath(id string) *xmlpath.Path {
 	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]/TextLine", id))
 }
 
-// // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode entry
-// // (indexing is zero-based).
-// func (r Region) TextEquivUnicodeAt(i int) (string, bool) {
-// 	return textEquivTypeUnicodeAt(r.node, i)
-// }
+func regionXPath(id string) *xmlpath.Path {
+	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]", id))
+}
 
 func newRegion(root, node *xmlpath.Node) (Region, error) {
 	region := Region{root: root}
