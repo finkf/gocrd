@@ -110,35 +110,35 @@ func TestLineTextEquivUnicode(t *testing.T) {
 	}
 }
 
-// func TestFindWordByID(t *testing.T) {
-// 	tests := []struct {
-// 		refID, lineID, wordID, word string
-// 		find                        bool
-// 	}{
-// 		{"r_1_1", "tl_1", "invalid-word-id", "", false},
-// 		{"r_1_1", "tl_1", "w_w1aab1b1b2b1b1ab1", "(", true},
-// 		{"r_2_1", "tl_2", "w_w1aab1b3b2b1b1ab1", "gewiegelt", true},
-// 	}
-// 	for _, tc := range tests {
-// 		t.Run(tc.refID+" "+tc.lineID, func(t *testing.T) {
-// 			page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
-// 			if err != nil {
-// 				t.Fatalf("got error: %v", err)
-// 			}
-// 			r, _ := page.FindRegionByRefID(tc.refID)
-// 			l, _ := r.FindLineByID(tc.lineID)
-// 			w, ok := l.FindWordByID(tc.wordID)
-// 			if tc.find != ok {
-// 				t.Fatalf("expected ok=%t; got ok=%t", tc.find, ok)
-// 			}
-// 			if tc.find && w.ID != tc.wordID {
-// 				t.Fatalf("expected %s; got %s", tc.wordID, w.ID)
-// 			}
-// 			if tc.find {
-// 				if got, _ := w.TextEquivUnicodeAt(0); got != tc.word {
-// 					t.Fatalf("expected %s; got %s", tc.word, got)
-// 				}
-// 			}
-// 		})
-// 	}
-// }
+func TestFindWordByID(t *testing.T) {
+	page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
+	if err != nil {
+		t.Fatalf("got error: %v", err)
+	}
+	tests := []struct {
+		refID, lineID, wordID, word string
+		find                        bool
+	}{
+		{"r_1_1", "tl_1", "invalid-word-id", "", false},
+		{"r_1_1", "tl_1", "w_w1aab1b1b2b1b1ab1", "(", true},
+		{"r_2_1", "tl_2", "w_w1aab1b3b2b1b1ab1", "gewiegelt", true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.refID+" "+tc.lineID, func(t *testing.T) {
+			r, _ := page.FindRegionByID(tc.refID)
+			l, _ := r.FindLineByID(tc.lineID)
+			w, ok := l.FindWordByID(tc.wordID)
+			if tc.find != ok {
+				t.Fatalf("expected ok=%t; got ok=%t", tc.find, ok)
+			}
+			if tc.find && w.ID != tc.wordID {
+				t.Fatalf("expected %s; got %s", tc.wordID, w.ID)
+			}
+			if tc.find {
+				if got, _ := w.TextEquivUnicodeAt(0); got != tc.word {
+					t.Fatalf("expected %s; got %s", tc.word, got)
+				}
+			}
+		})
+	}
+}
