@@ -15,12 +15,25 @@ const (
 	MIMEType = "application/alto+xml"
 )
 
+// XPath helper
 var (
 	indexXPath            = xmlpath.MustCompile("@index")
 	regionRefXPath        = xmlpath.MustCompile("@regionRef")
 	idXPath               = xmlpath.MustCompile("@id")
 	regionRefIndexedXPath = xmlpath.MustCompile("/PcGts/Page/ReadingOrder/*/RegionRefIndexed")
 )
+
+func textEquivUnicodeXPath(i int) *xmlpath.Path {
+	return xmlpath.MustCompile(fmt.Sprintf("./TextEquiv[%d]/Unicode", i))
+}
+
+func linesXPath(id string) *xmlpath.Path {
+	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]/TextLine", id))
+}
+
+func regionXPath(id string) *xmlpath.Path {
+	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]", id))
+}
 
 // Page represents an open page XML file.
 type Page struct {
@@ -104,18 +117,6 @@ func (r Region) TextEquivUnicodeAt(pos int) (string, bool) {
 	return "", false
 }
 
-func textEquivUnicodeXPath(i int) *xmlpath.Path {
-	return xmlpath.MustCompile(fmt.Sprintf("./TextEquiv[%d]/Unicode", i))
-}
-
-func linesXPath(id string) *xmlpath.Path {
-	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]/TextLine", id))
-}
-
-func regionXPath(id string) *xmlpath.Path {
-	return xmlpath.MustCompile(fmt.Sprintf("/PcGts/Page/TextRegion[@id=%q]", id))
-}
-
 func newRegion(root, node *xmlpath.Node) (Region, error) {
 	region := Region{root: root}
 	str, ok := indexXPath.String(node)
@@ -172,6 +173,15 @@ func newRegion(root, node *xmlpath.Node) (Region, error) {
 type Line struct {
 	node *xmlpath.Node
 	ID   string
+}
+
+// TextEquivUnicodeAt returns the i-th TextEquiv/Unicode entry
+// (indexing is zero-based).
+func (l Line) TextEquivUnicodeAt(pos int) (string, bool) {
+	if i := regionXPath(r.ID).Iter(r.root); i.Next() {
+		return textEquivUnicodeXPath(pos + 1).String(i.Node())
+	}
+	return "", false
 }
 
 // // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode element
