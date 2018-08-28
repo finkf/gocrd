@@ -4,13 +4,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/antchfx/xmlquery"
+	"launchpad.net/xmlpath"
 )
+
+var (
+	mimeTypeXPath = xmlpath.MustCompile(".[@MIMETYPE]")
+	idXPath       = xmlpath.MustCompile(".[@ID]")
+	hrefXPath     = xmlpath.MustCompile(".[@href]")
+	locTypeXPath  = xmlpath.MustCompile(".[@LOCTYPE]")
+	flocatXPath   = xmlpath.MustCompile("./FLocat")
+)
+
+func fileGrpUseXPath(use string) *xmlpath.Path {
+	return xmlpath.MustCompile(fmt.Sprintf("/mets/fileSec/fileGrp[@USE=%q]", use))
+}
 
 // Mets represents an open METS file.
 type Mets struct {
 	path string
-	root *xmlquery.Node
+	root *xmlpath.Node
 }
 
 // Open opens a Mets structure from a given path.
@@ -20,7 +32,7 @@ func Open(path string) (Mets, error) {
 		return Mets{}, err
 	}
 	defer func() { _ = in.Close() }()
-	root, err := xmlquery.Parse(in)
+	root, err := xmlpath.Parse(in)
 	if err != nil {
 		return Mets{}, err
 	}
@@ -34,21 +46,16 @@ func Open(path string) (Mets, error) {
 // It returns a list of files and true if a file group
 // with the given USE flag was found.
 // Note that the list of files can be empty even if true is returned.
-func (m Mets) FindFileGrp(use string) ([]File, bool) {
-	grp := xmlquery.FindOne(m.root, xpathFileGrpUse(use))
-	if grp == nil {
-		return nil, false
-	}
+func (m Mets) FindFileGrp(use string) []File {
 	var fs []File
-	files := xmlquery.Find(grp, "./mets:file")
-	for _, n := range files {
-		fs = append(fs, newFileFromNode(n))
+	for i := fileGrpUseXPath(use).Iter(m.root); i.Next(); {
+		f, ok := newFileFromNode((i.Node()))
+		if !ok {
+			continue
+		}
+		fs = append(fs, f)
 	}
-	return fs, true
-}
-
-func xpathFileGrpUse(use string) string {
-	return fmt.Sprintf("/mets:mets/mets:fileSec/mets:fileGrp[@USE=%q]", use)
+	return fs
 }
 
 // FLocat represents a mets:FLocat of a mets:file entry.
@@ -62,37 +69,34 @@ type File struct {
 	FLocat       FLocat
 }
 
-func newFileFromNode(n *xmlquery.Node) File {
+func newFileFromNode(n *xmlpath.Node) (File, bool) {
 	var file File
-	if n == nil {
-		return file
+	str, ok := mimeTypeXPath.String(n)
+	if ok {
+		file.MIMEType = str
 	}
-	i := xmlquery.CreateXPathNavigator(n)
-	for i.MoveToNextAttribute() {
-		switch i.LocalName() {
-		case "ID":
-			file.ID = i.Value()
-		case "MIMETYPE":
-			file.MIMEType = i.Value()
-		}
+	str, ok = idXPath.String(n)
+	if ok {
+		file.ID = str
 	}
-	file.FLocat = newFLocatFromNode(xmlquery.FindOne(n, "./mets:FLocat"))
-	return file
+	file.FLocat = newFLocatFromNode(n)
+	return file, file.ID != ""
 }
 
-func newFLocatFromNode(n *xmlquery.Node) FLocat {
-	var flocat FLocat
-	if n == nil {
-		return flocat
+func newFLocatFromNode(n *xmlpath.Node) FLocat {
+	i := flocatXPath.Iter(n)
+	if !i.Next() {
+		return FLocat{}
 	}
-	i := xmlquery.CreateXPathNavigator(n)
-	for i.MoveToNextAttribute() {
-		switch i.LocalName() {
-		case "LOCTYPE":
-			flocat.Type = i.Value()
-		case "href":
-			flocat.URL = i.Value()
-		}
+	n = i.Node()
+	var flocat FLocat
+	str, ok := hrefXPath.String(n)
+	if ok {
+		flocat.URL = str
+	}
+	str, ok = locTypeXPath.String(n)
+	if ok {
+		flocat.Type = str
 	}
 	return flocat
 }

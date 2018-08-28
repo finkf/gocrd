@@ -8,11 +8,10 @@ func TestFindFileGroups(t *testing.T) {
 	tests := []struct {
 		fileGrp string
 		n       int
-		ok      bool
 	}{
-		{"NOT-A-VALID-FILEGRP", 0, false},
-		{"OCR-D-IMG", 0, true},
-		{"OCR-D-GT-ALTO", 1, true},
+		{"NOT-A-VALID-FILEGRP", 0},
+		{"OCR-D-IMG", 0},
+		{"OCR-D-GT-ALTO", 1},
 	}
 	for _, tc := range tests {
 		t.Run(tc.fileGrp, func(t *testing.T) {
@@ -20,10 +19,7 @@ func TestFindFileGroups(t *testing.T) {
 			if err != nil {
 				t.Fatalf("got error: %v", err)
 			}
-			fs, ok := m.FindFileGrp(tc.fileGrp)
-			if ok != tc.ok {
-				t.Fatalf("expected %t; got %t", tc.ok, ok)
-			}
+			fs := m.FindFileGrp(tc.fileGrp)
 			if got := len(fs); got != tc.n {
 				t.Fatalf("expected %d; got %d", tc.n, got)
 			}
@@ -51,10 +47,7 @@ func TestFiles(t *testing.T) {
 			if err != nil {
 				t.Fatalf("got error: %v", err)
 			}
-			fs, ok := m.FindFileGrp(tc.fileGrp)
-			if !ok {
-				t.Fatalf("could not find file group %q", tc.fileGrp)
-			}
+			fs := m.FindFileGrp(tc.fileGrp)
 			if got := fs[0]; got != tc.file {
 				t.Fatalf("expected %v; got %v", tc.file, got)
 			}
