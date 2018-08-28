@@ -42,10 +42,10 @@ func Open(path string) (Page, error) {
 }
 
 func readRegions(node *xmlquery.Node) ([]Region, error) {
-	regions := xmlquery.Find(node, "/*:PcGts/*:Page/*:ReadingOrder/*/*:RegionRefIndexed")
+	regions := xmlquery.Find(node, "/*:PcGts/*:Page/*:ReadingOrder/*:*/*:RegionRefIndexed")
 	var res []Region
 	for _, r := range regions {
-		region, err := newRegion(p.root, r)
+		region, err := newRegion(node, r)
 		if err != nil {
 			return nil, err
 		}
@@ -53,7 +53,7 @@ func readRegions(node *xmlquery.Node) ([]Region, error) {
 	}
 	// sort by region.index
 	sort.Slice(res, func(i, j int) bool {
-		return res[i].index < p.res[j].index
+		return res[i].index < res[j].index
 	})
 	return res, nil
 }
