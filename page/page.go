@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strconv"
 
-	xmlpath "launchpad.net/xmlpath"
+	"launchpad.net/xmlpath"
 )
 
 const (
