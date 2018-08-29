@@ -1,6 +1,7 @@
 package mets
 
 import (
+	"log"
 	"testing"
 )
 
@@ -21,6 +22,9 @@ func TestFindFileGroups(t *testing.T) {
 			}
 			fs := m.FindFileGrp(tc.fileGrp)
 			if got := len(fs); got != tc.n {
+				for _, f := range fs {
+					log.Printf("f: %v", f)
+				}
 				t.Fatalf("expected %d; got %d", tc.n, got)
 			}
 		})

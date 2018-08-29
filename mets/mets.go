@@ -8,15 +8,15 @@ import (
 )
 
 var (
-	mimeTypeXPath = xmlpath.MustCompile(".[@MIMETYPE]")
-	idXPath       = xmlpath.MustCompile(".[@ID]")
-	hrefXPath     = xmlpath.MustCompile(".[@href]")
-	locTypeXPath  = xmlpath.MustCompile(".[@LOCTYPE]")
+	mimeTypeXPath = xmlpath.MustCompile("@MIMETYPE")
+	idXPath       = xmlpath.MustCompile("@ID")
+	hrefXPath     = xmlpath.MustCompile("@href")
+	locTypeXPath  = xmlpath.MustCompile("@LOCTYPE")
 	flocatXPath   = xmlpath.MustCompile("./FLocat")
 )
 
 func fileGrpUseXPath(use string) *xmlpath.Path {
-	return xmlpath.MustCompile(fmt.Sprintf("/mets/fileSec/fileGrp[@USE=%q]", use))
+	return xmlpath.MustCompile(fmt.Sprintf("/mets/fileSec/fileGrp[@USE=%q]/file", use))
 }
 
 // Mets represents an open METS file.
@@ -49,11 +49,7 @@ func Open(path string) (Mets, error) {
 func (m Mets) FindFileGrp(use string) []File {
 	var fs []File
 	for i := fileGrpUseXPath(use).Iter(m.root); i.Next(); {
-		f, ok := newFileFromNode((i.Node()))
-		if !ok {
-			continue
-		}
-		fs = append(fs, f)
+		fs = append(fs, newFileFromNode(i.Node()))
 	}
 	return fs
 }
@@ -69,7 +65,7 @@ type File struct {
 	FLocat       FLocat
 }
 
-func newFileFromNode(n *xmlpath.Node) (File, bool) {
+func newFileFromNode(n *xmlpath.Node) File {
 	var file File
 	str, ok := mimeTypeXPath.String(n)
 	if ok {
@@ -80,7 +76,7 @@ func newFileFromNode(n *xmlpath.Node) (File, bool) {
 		file.ID = str
 	}
 	file.FLocat = newFLocatFromNode(n)
-	return file, file.ID != ""
+	return file
 }
 
 func newFLocatFromNode(n *xmlpath.Node) FLocat {
