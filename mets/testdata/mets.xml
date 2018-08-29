@@ -30,6 +30,9 @@
       <mets:file ID="PAGE_0020_ALTO" MIMETYPE="application/alto+xml">
         <mets:FLocat LOCTYPE="URL" xlink:href="https://github.com/OCR-D/assets/raw/master/data/kant_aufklaerung_1784/alto/kant_aufklaerung_1784_0020.xml" />
       </mets:file>
+      <mets:file ID="PAGE_0021_ALTO" MIMETYPE="application/alto+xml">
+        <mets:FLocat LOCTYPE="URL" xlink:href="https://github.com/OCR-D/assets/raw/master/data/kant_aufklaerung_1784/alto/kant_aufklaerung_1784_0021.xml" />
+      </mets:file>
     </mets:fileGrp>
   </mets:fileSec>
 </mets:mets>
