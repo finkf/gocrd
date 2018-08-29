@@ -164,6 +164,8 @@ func TestFind(t *testing.T) {
 		{Match{RegionID: "r_1_1", LineID: "tl_1"}, true},
 		{Match{RegionID: "r_2_1", LineID: "tl_2"}, true},
 		{Match{RegionID: "r_1_1", LineID: "tl_2"}, false},
+		{Match{RegionID: "r_2_1", LineID: "tl_2", WordID: "w_w1aab1b3b2b1b1ab1"}, true},
+		{Match{RegionID: "r_1_1", LineID: "tl_2", WordID: "w_w1aab1b3b2b1b1ab1"}, false},
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s", tc.m), func(t *testing.T) {
