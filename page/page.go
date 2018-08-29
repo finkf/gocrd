@@ -2,9 +2,13 @@ package page // import "github.com/finkf/gocrd/page"
 
 import (
 	"fmt"
+	"image"
+	"log"
+	"math"
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 
 	"launchpad.net/xmlpath"
 )
@@ -17,6 +21,7 @@ const (
 
 // XPath helpers
 var (
+	coordsXPath           = xmlpath.MustCompile("./Coords/@points")
 	indexXPath            = xmlpath.MustCompile("@index")
 	regionRefXPath        = xmlpath.MustCompile("@regionRef")
 	idXPath               = xmlpath.MustCompile("@id")
@@ -93,11 +98,14 @@ func (m Match) xpath() *xmlpath.Path {
 	} else if suffix != "" {
 		suffix = "/*" + suffix
 	}
-	if m.RegionID != "" {
+	if m.RegionID != "" && suffix != "" {
 		suffix = fmt.Sprintf("/TextRegion[@id=%q]%s", m.RegionID, suffix)
+	} else if m.RegionID != "" {
+		suffix = fmt.Sprintf("/ReadingOrder/*/RegionRefIndexed[@regionRef=%q]", m.RegionID)
 	} else if suffix != "" {
 		suffix = "/*" + suffix
 	}
+	log.Printf("XPath: %s", "/PcGts/Page"+suffix)
 	return xmlpath.MustCompile("/PcGts/Page" + suffix)
 }
 
@@ -112,6 +120,7 @@ func (m Match) find(root *xmlpath.Node) (TextRegion, bool) {
 		if m.RegionID != "" {
 			r, err := newRegion(root, i.Node())
 			if err != nil {
+				log.Printf("got error: %v", err)
 				return nil, false
 			}
 			return r, true
@@ -197,20 +206,30 @@ func (r Region) TextEquivUnicodeAt(pos int) (string, bool) {
 	return "", false
 }
 
+// Polygon returns the region's polygon of coordinates.
+func (r Region) Polygon() (Polygon, error) {
+	if i := regionXPath(r.id).Iter(r.root); i.Next() {
+		return newPolygon(i.Node())
+	}
+	return nil, fmt.Errorf("invalid region: %s", r.id)
+}
+
 func newRegion(root, node *xmlpath.Node) (Region, error) {
 	region := Region{root: root}
 	str, ok := indexXPath.String(node)
-	if ok {
-		index, err := strconv.Atoi(str)
-		if err != nil {
-			return Region{}, err
-		}
-		region.index = index
+	if !ok {
+		return Region{}, fmt.Errorf("invalid region: missing index")
 	}
+	index, err := strconv.Atoi(str)
+	if err != nil {
+		return Region{}, fmt.Errorf("invalid region: %v", err)
+	}
+	region.index = index
 	str, ok = regionRefXPath.String(node)
-	if ok {
-		region.id = str
+	if !ok {
+		return Region{}, fmt.Errorf("invalid region: missing id")
 	}
+	region.id = str
 	return region, nil
 }
 
@@ -251,6 +270,11 @@ func (l Line) FindWordByID(id string) (Word, bool) {
 	return Word{}, false
 }
 
+// Polygon returns the line's polygon of coordinates.
+func (l Line) Polygon() (Polygon, error) {
+	return newPolygon(l.node)
+}
+
 // Word represents a word on a line.
 type Word struct {
 	node *xmlpath.Node
@@ -266,4 +290,65 @@ func (w Word) ID() string {
 // (the indexing is zero-based).
 func (w Word) TextEquivUnicodeAt(pos int) (string, bool) {
 	return textEquivUnicodeXPath(pos).String(w.node)
+}
+
+// Polygon returns the word's polygon of coordinates.
+func (w Word) Polygon() (Polygon, error) {
+	return newPolygon(w.node)
+}
+
+// Polygon is used to represent the polygons of
+// <Coords points='...'/> points in the PAGE-XML.
+type Polygon []image.Point
+
+// Rectangle returns the bounding rectangle of the polygon.
+func (p Polygon) Rectangle() image.Rectangle {
+	minx := math.MaxInt64
+	maxx := math.MinInt64
+	miny := math.MaxInt64
+	maxy := math.MinInt64
+	for _, p := range p {
+		if p.X < minx {
+			minx = p.X
+		}
+		if p.Y < miny {
+			miny = p.Y
+		}
+		if p.X > maxx {
+			maxx = p.X
+		}
+		if p.Y > maxy {
+			maxy = p.Y
+		}
+	}
+	return image.Rect(int(minx), int(miny), int(maxx), int(maxy))
+}
+
+// <Coords points="846,294 1026,294 1026,337 846,337"/>
+func newPolygon(node *xmlpath.Node) (Polygon, error) {
+	psstr, ok := coordsXPath.String(node)
+	if !ok {
+		return nil, fmt.Errorf("invalid coordinates: missing")
+	}
+	var points []image.Point
+	ps := strings.Split(psstr, " ")
+	if len(ps) < 2 {
+		return nil, fmt.Errorf("invalid coordinates: %q", psstr)
+	}
+	for _, p := range ps {
+		point := strings.Split(p, ",")
+		if len(point) != 2 {
+			return nil, fmt.Errorf("invalid coordinates: invalid point: %q", p)
+		}
+		x, err := strconv.Atoi(point[0])
+		if err != nil {
+			return nil, err
+		}
+		y, err := strconv.Atoi(point[1])
+		if err != nil {
+			return nil, err
+		}
+		points = append(points, image.Point{X: x, Y: y})
+	}
+	return points, nil
 }
