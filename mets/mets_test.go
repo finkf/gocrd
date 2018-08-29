@@ -35,18 +35,18 @@ func TestFind(t *testing.T) {
 		t.Fatalf("got error: %v", err)
 	}
 	tests := []struct {
-		m Matcher
+		m Match
 		n int
 	}{
-		{Matcher{Use: "OCR-D-IMG"}, 0},
-		{Matcher{Use: "OCR-D-GT-PAGE"}, 1},
-		{Matcher{Use: "OCR-D-GT-ALTO"}, 2},
-		{Matcher{MIMEType: "application/alto+xml"}, 2},
-		{Matcher{MIMEType: "imge/tiff"}, 0},
-		{Matcher{MIMEType: "application/vnd.prima.page+xml"}, 1},
-		{Matcher{FileID: "PAGE_0020_ALTO"}, 1},
-		{Matcher{FileID: "PAGE_0020_PAGE"}, 1},
-		{Matcher{FileID: "PAGE_0021_ALTO"}, 1},
+		{Match{Use: "OCR-D-IMG"}, 0},
+		{Match{Use: "OCR-D-GT-PAGE"}, 1},
+		{Match{Use: "OCR-D-GT-ALTO"}, 2},
+		{Match{MIMEType: "application/alto+xml"}, 2},
+		{Match{MIMEType: "imge/tiff"}, 0},
+		{Match{MIMEType: "application/vnd.prima.page+xml"}, 1},
+		{Match{FileID: "PAGE_0020_ALTO"}, 1},
+		{Match{FileID: "PAGE_0020_PAGE"}, 1},
+		{Match{FileID: "PAGE_0021_ALTO"}, 1},
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s", tc.m), func(t *testing.T) {

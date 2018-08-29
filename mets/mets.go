@@ -45,30 +45,30 @@ func Open(path string) (Mets, error) {
 // FindFileGrp searches for a file group with the given USE flag.
 // It returns a list of matching files.
 func (m Mets) FindFileGrp(use string) []File {
-	return m.Find(Matcher{Use: use})
+	return m.Find(Match{Use: use})
 }
 
 // Find returns a list of matching files. Empty fields in the
-// given matcher are ignored for the matching.
-func (m Mets) Find(matcher Matcher) []File {
+// given match are ignored for the matching.
+func (m Mets) Find(match Match) []File {
 	var fs []File
-	for i := matcher.xpath().Iter(m.root); i.Next(); {
+	for i := match.xpath().Iter(m.root); i.Next(); {
 		fs = append(fs, newFileFromNode(i.Node()))
 	}
 	return fs
 }
 
-// Matcher is used to match files.
+// Match is used to match files.
 // If a field is the empty string it is ignored for the matching.
-type Matcher struct {
+type Match struct {
 	Use, FileID, MIMEType string
 }
 
-func (m Matcher) String() string {
+func (m Match) String() string {
 	return fmt.Sprintf("{%q,%q,%q}", m.Use, m.FileID, m.MIMEType)
 }
 
-func (m Matcher) xpath() *xmlpath.Path {
+func (m Match) xpath() *xmlpath.Path {
 	xpath := "/mets/fileSec/fileGrp/file"
 	if m.Use != "" {
 		xpath = fmt.Sprintf("/mets/fileSec/fileGrp[@USE=%q]/file", m.Use)
