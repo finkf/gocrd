@@ -43,9 +43,7 @@ func Open(path string) (Mets, error) {
 }
 
 // FindFileGrp searches for a file group with the given USE flag.
-// It returns a list of files and true if a file group
-// with the given USE flag was found.
-// Note that the list of files can be empty even if true is returned.
+// It returns a list of matching files.
 func (m Mets) FindFileGrp(use string) []File {
 	var fs []File
 	for i := fileGrpUseXPath(use).Iter(m.root); i.Next(); {
