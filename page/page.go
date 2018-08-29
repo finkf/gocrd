@@ -3,7 +3,6 @@ package page // import "github.com/finkf/gocrd/page"
 import (
 	"fmt"
 	"image"
-	"log"
 	"math"
 	"os"
 	"sort"
@@ -105,7 +104,6 @@ func (m Match) xpath() *xmlpath.Path {
 	} else if suffix != "" {
 		suffix = "/*" + suffix
 	}
-	log.Printf("XPath: %s", "/PcGts/Page"+suffix)
 	return xmlpath.MustCompile("/PcGts/Page" + suffix)
 }
 
@@ -120,7 +118,6 @@ func (m Match) find(root *xmlpath.Node) (TextRegion, bool) {
 		if m.RegionID != "" {
 			r, err := newRegion(root, i.Node())
 			if err != nil {
-				log.Printf("got error: %v", err)
 				return nil, false
 			}
 			return r, true

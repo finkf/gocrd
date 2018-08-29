@@ -3,7 +3,6 @@ package page
 import (
 	"fmt"
 	"image"
-	"log"
 	"testing"
 )
 
@@ -207,7 +206,6 @@ func TestRectangle(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s", tc.m), func(t *testing.T) {
 			r, _ := page.Find(tc.m)
-			log.Printf("fucking rectangle: %s", r.ID())
 			p, err := r.Polygon()
 			if err != nil {
 				t.Fatalf("got error: %v", err)
