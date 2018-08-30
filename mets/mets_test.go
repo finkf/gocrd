@@ -15,7 +15,7 @@ func TestFindFileGroups(t *testing.T) {
 		n       int
 	}{
 		{"NOT-A-VALID-FILEGRP", 0},
-		{"OCR-D-IMG", 0},
+		{"OCR-D-IMG", 1},
 		{"OCR-D-GT-PAGE", 1},
 		{"OCR-D-GT-ALTO", 2},
 	}
@@ -38,11 +38,11 @@ func TestFind(t *testing.T) {
 		m Match
 		n int
 	}{
-		{Match{Use: "OCR-D-IMG"}, 0},
+		{Match{Use: "OCR-D-IMG"}, 1},
 		{Match{Use: "OCR-D-GT-PAGE"}, 1},
 		{Match{Use: "OCR-D-GT-ALTO"}, 2},
 		{Match{MIMEType: "application/alto+xml"}, 2},
-		{Match{MIMEType: "imge/tiff"}, 0},
+		{Match{MIMEType: "image/tiff"}, 1},
 		{Match{MIMEType: "application/vnd.prima.page+xml"}, 1},
 		{Match{FileID: "PAGE_0020_ALTO"}, 1},
 		{Match{FileID: "PAGE_0020_PAGE"}, 1},
