@@ -180,8 +180,8 @@ func (r Region) Lines() []Line {
 }
 
 // ID returns the region's ID.
-func (w Region) ID() string {
-	return w.id
+func (r Region) ID() string {
+	return r.id
 }
 
 // FindLineByID searches for a line with the given ID.
