@@ -47,6 +47,9 @@ func TestFind(t *testing.T) {
 		{Match{FileID: "PAGE_0020_ALTO"}, 1},
 		{Match{FileID: "PAGE_0020_PAGE"}, 1},
 		{Match{FileID: "PAGE_0021_ALTO"}, 1},
+		{Match{GroupID: "INPUT_0020"}, 3},
+		{Match{GroupID: "INPUT_0021"}, 1},
+		{Match{GroupID: "INVALID_GROUP_ID"}, 0},
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s", tc.m), func(t *testing.T) {

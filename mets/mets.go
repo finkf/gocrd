@@ -61,7 +61,7 @@ func (m Mets) Find(match Match) []File {
 // Match is used to match files.
 // If a field is the empty string it is ignored for the matching.
 type Match struct {
-	Use, FileID, MIMEType string
+	Use, FileID, MIMEType, GroupID string
 }
 
 func (m Match) String() string {
@@ -78,6 +78,9 @@ func (m Match) xpath() *xmlpath.Path {
 	}
 	if m.MIMEType != "" {
 		xpath += fmt.Sprintf("[@MIMETYPE=%q]", m.MIMEType)
+	}
+	if m.GroupID != "" {
+		xpath += fmt.Sprintf("[@GROUPID=%q]", m.GroupID)
 	}
 	return xmlpath.MustCompile(xpath)
 }
@@ -124,6 +127,3 @@ func newFLocatFromNode(n *xmlpath.Node) FLocat {
 	}
 	return flocat
 }
-
-// <mets:file ID="PAGE_0020_ALTO" MIMETYPE="application/alto+xml">
-//     <mets:FLocat LOCTYPE="URL" xlink:href="https://github.com/OCR-D/assets/raw/master/data/
