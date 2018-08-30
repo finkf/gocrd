@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<PcGts xmlns:pc="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
   <Metadata>
     <Creator>OCR-D</Creator>
     <Created>2016-09-20T11:09:27.431+02:00</Created>
@@ -14,14 +14,14 @@
     <PrintSpace>
       <Coords points="468,250 1349,250 1349,1830 468,1830"/>
     </PrintSpace>
-    <pc:ReadingOrder>
-      <pc:OrderedGroup id="ro_1488818689634" caption="Regions reading order">
-        <pc:RegionRefIndexed index="0" regionRef="r_1_1"/>
-        <pc:RegionRefIndexed index="1" regionRef="r_2_1"/>
-        <pc:RegionRefIndexed index="2" regionRef="r_2_2"/>
-        <pc:RegionRefIndexed index="3" regionRef="r_2_3"/>
-      </pc:OrderedGroup>
-    </pc:ReadingOrder>
+    <ReadingOrder>
+      <OrderedGroup id="ro_1488818689634" caption="Regions reading order">
+        <RegionRefIndexed index="0" regionRef="r_1_1"/>
+        <RegionRefIndexed index="1" regionRef="r_2_1"/>
+        <RegionRefIndexed index="2" regionRef="r_2_2"/>
+        <RegionRefIndexed index="3" regionRef="r_2_3"/>
+      </OrderedGroup>
+    </ReadingOrder>
     <TextRegion type="page-number" id="r_1_1" custom="readingOrder {index:0;} structure {type:page-number;}">
       <Coords points="846,294 1026,294 1026,337 846,337"/>
       <TextLine id="tl_1" primaryLanguage="German" custom="readingOrder {index:0;}">
