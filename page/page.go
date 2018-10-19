@@ -121,12 +121,12 @@ type Page struct {
 
 // Open opens a page XML file
 func Open(path string) (Page, error) {
-	in, err := os.Open(path)
+	is, err := os.Open(path)
 	if err != nil {
 		return Page{}, err
 	}
-	defer func() { _ = in.Close() }()
-	root, err := xmlpath.Parse(in)
+	defer is.Close()
+	root, err := xmlpath.Parse(is)
 	if err != nil {
 		return Page{}, err
 	}
@@ -163,7 +163,7 @@ func (p Page) TextEquivUnicodeAt(pos int) (string, bool) {
 		b.WriteString(region)
 		pre = "\n\n"
 	}
-	return b.String(), false
+	return b.String(), true
 }
 
 // Find searches for a given {region,line,word}-ID in the PAGE-XML
