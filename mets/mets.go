@@ -2,7 +2,10 @@ package mets // import "github.com/finkf/gocrd/mets"
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strings"
 
 	"launchpad.net/xmlpath"
 )
@@ -88,6 +91,22 @@ func (m Match) xpath() *xmlpath.Path {
 // FLocat represents a mets:FLocat of a mets:file entry.
 type FLocat struct {
 	Type, URL string
+}
+
+// Open opens a reader to the FLocat.
+// Currently only URL's are supported.
+func (f FLocat) Open() (io.ReadCloser, error) {
+	if f.Type != "URL" {
+		return nil, fmt.Errorf("open: unsupported LOCTYPE: %s", f.Type)
+	}
+	if strings.HasPrefix(f.URL, "file://") {
+		return os.Open(f.URL[7:])
+	}
+	r, err := http.Get(f.URL)
+	if err != nil {
+		return nil, fmt.Errorf("open: %v", err)
+	}
+	return r.Body, nil
 }
 
 // File represents a mets:file entry
