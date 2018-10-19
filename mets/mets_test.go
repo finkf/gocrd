@@ -80,7 +80,8 @@ func TestFiles(t *testing.T) {
 				ID:       "PAGE_0020_ALTO",
 				FLocat: FLocat{
 					Type: "URL",
-					URL:  "https://github.com/OCR-D/assets/raw/master/data/kant_aufklaerung_1784/alto/kant_aufklaerung_1784_0020.xml",
+					URL: "https://github.com/OCR-D/assets/raw/master/data/" +
+						"kant_aufklaerung_1784/alto/kant_aufklaerung_1784_0020.xml",
 				},
 			}},
 		}
