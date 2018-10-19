@@ -237,8 +237,8 @@ type Line struct {
 }
 
 // ID returns the line's ID.
-func (w Line) ID() string {
-	return w.id
+func (l Line) ID() string {
+	return l.id
 }
 
 // TextEquivUnicodeAt returns the i-th TextEquiv/Unicode entry
