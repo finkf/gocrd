@@ -40,11 +40,11 @@ func cat(cmd *cobra.Command, args []string) error {
 	ifg1 := m.Find(mets.Match{Use: inputFileGroups[0]})
 	ifg2 := m.Find(mets.Match{Use: inputFileGroups[1]})
 	err = zip(ifg1, ifg2, func(a, b mets.File) error {
-		ls1, e2 := readFLocat(a.FLocat)
+		ls1, e2 := readRegions(a.FLocat)
 		if e2 != nil {
 			return fmt.Errorf("cannot read %s: %v", a.FLocat.URL, err)
 		}
-		ls2, e2 := readFLocat(b.FLocat)
+		ls2, e2 := readRegions(b.FLocat)
 		if e2 != nil {
 			return fmt.Errorf("cannot read %s: %v", b.FLocat.URL, err)
 		}
@@ -59,7 +59,7 @@ func cat(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-func readFLocat(f mets.FLocat) ([]string, error) {
+func readRegions(f mets.FLocat) ([]string, error) {
 	r, err := f.Open()
 	if err != nil {
 		return nil, err
