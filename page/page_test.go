@@ -13,14 +13,14 @@ const (
 	goldTXT     = "kant_aufklaerung_1784_0020.txt"
 )
 
-func withOpenPage(f func(page Page)) {
+func withPage(f func(page Page)) {
 	page, err := Open(testdata.File(testPageXML))
 	testdata.Must(err)
 	f(page)
 }
 
 func TestPage(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		// <Coords points="468,250 1349,250 1349,1830 468,1830"/>
 		want := image.Rectangle{
 			Min: image.Point{X: 468, Y: 250},
@@ -42,7 +42,7 @@ func TestPage(t *testing.T) {
 }
 
 func TestFindRegionByRefID(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		tests := []struct {
 			id   string
 			find bool
@@ -69,7 +69,7 @@ func TestFindRegionByRefID(t *testing.T) {
 }
 
 func TestRegionTextEquivUnicode(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		tests := []struct {
 			id, want string
 			idx      int
@@ -95,7 +95,7 @@ func TestRegionTextEquivUnicode(t *testing.T) {
 }
 
 func TestFindLineByID(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		tests := []struct {
 			refID, lineID string
 			find          bool
@@ -122,7 +122,7 @@ func TestFindLineByID(t *testing.T) {
 }
 
 func TestLineTextEquivUnicode(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		tests := []struct {
 			regionID, lineID, want string
 		}{
@@ -143,7 +143,7 @@ func TestLineTextEquivUnicode(t *testing.T) {
 }
 
 func TestFindWordByID(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		tests := []struct {
 			refID, lineID, wordID, word string
 			find                        bool
@@ -174,7 +174,7 @@ func TestFindWordByID(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		tests := []struct {
 			m    Match
 			id   string
@@ -215,7 +215,7 @@ func TestFind(t *testing.T) {
 }
 
 func TestRectangle(t *testing.T) {
-	withOpenPage(func(page Page) {
+	withPage(func(page Page) {
 		tests := []struct {
 			m    Match
 			want image.Rectangle
