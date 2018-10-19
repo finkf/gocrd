@@ -6,6 +6,29 @@ import (
 	"testing"
 )
 
+const (
+	testPageXML = "testdata/kant_aufklaerung_1784_0020.xml"
+)
+
+func TestPage(t *testing.T) {
+	page, err := Open(testPageXML)
+	if err != nil {
+		panic(err)
+	}
+	// <Coords points="468,250 1349,250 1349,1830 468,1830"/>
+	want := image.Rectangle{
+		Min: image.Point{X: 468, Y: 250},
+		Max: image.Point{X: 1349, Y: 1830},
+	}
+	p, err := page.Polygon()
+	if err != nil {
+		t.Fatalf("got error: %v", err)
+	}
+	if got := p.Rectangle(); got != want {
+		t.Fatalf("exected %s; got %s", want, got)
+	}
+}
+
 func TestFindRegionByRefID(t *testing.T) {
 	page, err := Open("testdata/kant_aufklaerung_1784_0020.xml")
 	if err != nil {

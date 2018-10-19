@@ -5,6 +5,7 @@ import (
 	"image"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -65,6 +66,22 @@ type TextRegion interface {
 type Page struct {
 	path string
 	root *xmlpath.Node
+}
+
+// ID returns the ID of a page.
+// The ID of a page is the page's basename.
+func (p Page) ID() string {
+	return filepath.Base(p.path)
+}
+
+// Polygon returns the page's print-space.
+func (p Page) Polygon() (Polygon, error) {
+	xpath := xmlpath.MustCompile("/PcGts/Page/PrintSpace")
+	i := xpath.Iter(p.root)
+	if !i.Next() {
+		return Polygon{}, fmt.Errorf("missing PrintSpace for %s", p.path)
+	}
+	return newPolygon(i.Node())
 }
 
 // Open opens a page XML file
