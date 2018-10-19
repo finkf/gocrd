@@ -3,6 +3,7 @@ package page // import "github.com/finkf/gocrd/page"
 import (
 	"fmt"
 	"image"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -126,11 +127,16 @@ func Open(path string) (Page, error) {
 		return Page{}, err
 	}
 	defer is.Close()
-	root, err := xmlpath.Parse(is)
+	return Parse(is, path)
+}
+
+// Parse parses a page XML file.
+func Parse(r io.Reader, id string) (Page, error) {
+	root, err := xmlpath.Parse(r)
 	if err != nil {
 		return Page{}, err
 	}
-	return Page{path, root}, nil
+	return Page{id, root}, nil
 }
 
 // ID returns the ID of a page.
