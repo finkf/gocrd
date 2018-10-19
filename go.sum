@@ -1,7 +1,3 @@
-github.com/finkf/testdata v0.1.0 h1:L/SwBISKF5MI9aS81Q5P42jkpZOvGwCJ0mDZeNRUTxo=
-github.com/finkf/testdata v0.1.0/go.mod h1:2IO5QaNz7bSuXc9JtgLOqvRvPdBfKFyL7SGyII1k0NA=
-github.com/finkf/testdata v0.1.1 h1:ZuGvPH7C5kx/pQT2ot6+bXDueRQoU1wHetu28zUKfsE=
-github.com/finkf/testdata v0.1.1/go.mod h1:2IO5QaNz7bSuXc9JtgLOqvRvPdBfKFyL7SGyII1k0NA=
 github.com/finkf/testdata v0.1.2 h1:jTveaMZF9VYqL6+IDOfewj+JrtOIzCBK+w5hkQlLBSQ=
 github.com/finkf/testdata v0.1.2/go.mod h1:2IO5QaNz7bSuXc9JtgLOqvRvPdBfKFyL7SGyII1k0NA=
 launchpad.net/gocheck v0.0.0-20140225173054-000000000087 h1:Izowp2XBH6Ya6rv+hqbceQyw/gSGoXfH/UPoTGduL54=
