@@ -13,3 +13,6 @@
 
 # Direnv .envrc files
 .envrc
+
+# Executable
+gocrd
