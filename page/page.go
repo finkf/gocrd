@@ -57,6 +57,7 @@ func idFromNode(node *xmlpath.Node) string {
 type TextRegion interface {
 	ID() string
 	TextEquivUnicodeAt(int) (string, bool)
+	EachSubRegion(func(TextRegion))
 	Polygon() (Polygon, error)
 }
 
@@ -172,11 +173,18 @@ type Region struct {
 // Lines Returns all lines in a region.
 func (r Region) Lines() []Line {
 	var lines []Line
-	for i := linesXPath(r.id).Iter(r.root); i.Next(); {
-		node := i.Node()
+	iterate(linesXPath(r.id), r.root, func(node *xmlpath.Node) {
 		lines = append(lines, Line{node, idFromNode(node)})
-	}
+	})
 	return lines
+}
+
+// EachSubRegion calls the given callback function for
+// each sub region (line) of the region.
+func (r Region) EachSubRegion(f func(TextRegion)) {
+	iterate(linesXPath(r.id), r.root, func(node *xmlpath.Node) {
+		f(Line{node, idFromNode(node)})
+	})
 }
 
 // ID returns the region's ID.
@@ -236,6 +244,14 @@ type Line struct {
 	id   string
 }
 
+// EachSubRegion calls the given callback function for
+// each sub region (word) of the region.
+func (l Line) EachSubRegion(f func(TextRegion)) {
+	iterate(wordsXPath, l.node, func(node *xmlpath.Node) {
+		f(Word{node, idFromNode(node)})
+	})
+}
+
 // ID returns the line's ID.
 func (l Line) ID() string {
 	return l.id
@@ -250,10 +266,9 @@ func (l Line) TextEquivUnicodeAt(pos int) (string, bool) {
 // Words returns all words in a line.
 func (l Line) Words() []Word {
 	var words []Word
-	for i := wordsXPath.Iter(l.node); i.Next(); {
-		node := i.Node()
+	iterate(wordsXPath, l.node, func(node *xmlpath.Node) {
 		words = append(words, Word{node, idFromNode(node)})
-	}
+	})
 	return words
 }
 
@@ -276,6 +291,11 @@ func (l Line) Polygon() (Polygon, error) {
 type Word struct {
 	node *xmlpath.Node
 	id   string
+}
+
+// EachSubRegion calls the given callback function for
+// each sub region (Glyph) of the region.
+func (w Word) EachSubRegion(f func(TextRegion)) {
 }
 
 // ID returns the word's ID.
@@ -348,4 +368,10 @@ func newPolygon(node *xmlpath.Node) (Polygon, error) {
 		points = append(points, image.Point{X: x, Y: y})
 	}
 	return points, nil
+}
+
+func iterate(xpath *xmlpath.Path, root *xmlpath.Node, f func(*xmlpath.Node)) {
+	for i := xpath.Iter(root); i.Next(); {
+		f(i.Node())
+	}
 }
