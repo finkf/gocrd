@@ -28,6 +28,7 @@ var (
 	regionRefIndexedXPath = xmlpath.MustCompile("/PcGts/Page/ReadingOrder/*/RegionRefIndexed")
 	wordsXPath            = xmlpath.MustCompile("./Word")
 	// check interface types
+	_ TextRegion = Page{}
 	_ TextRegion = Region{}
 	_ TextRegion = Line{}
 	_ TextRegion = Word{}
@@ -60,42 +61,6 @@ type TextRegion interface {
 	TextEquivUnicodeAt(int) (string, bool)
 	EachSubRegion(func(TextRegion))
 	Polygon() (Polygon, error)
-}
-
-// Page represents an open page XML file.
-type Page struct {
-	path string
-	root *xmlpath.Node
-}
-
-// ID returns the ID of a page.
-// The ID of a page is the page's basename.
-func (p Page) ID() string {
-	return filepath.Base(p.path)
-}
-
-// Polygon returns the page's print-space.
-func (p Page) Polygon() (Polygon, error) {
-	xpath := xmlpath.MustCompile("/PcGts/Page/PrintSpace")
-	i := xpath.Iter(p.root)
-	if !i.Next() {
-		return Polygon{}, fmt.Errorf("missing PrintSpace for %s", p.path)
-	}
-	return newPolygon(i.Node())
-}
-
-// Open opens a page XML file
-func Open(path string) (Page, error) {
-	in, err := os.Open(path)
-	if err != nil {
-		return Page{}, err
-	}
-	defer func() { _ = in.Close() }()
-	root, err := xmlpath.Parse(in)
-	if err != nil {
-		return Page{}, err
-	}
-	return Page{path, root}, nil
 }
 
 // Match is used to match text regions.
@@ -148,6 +113,59 @@ func (m Match) String() string {
 	return fmt.Sprintf("{%q,%q,%q}", m.RegionID, m.LineID, m.WordID)
 }
 
+// Page represents an open page XML file.
+type Page struct {
+	path string
+	root *xmlpath.Node
+}
+
+// Open opens a page XML file
+func Open(path string) (Page, error) {
+	in, err := os.Open(path)
+	if err != nil {
+		return Page{}, err
+	}
+	defer func() { _ = in.Close() }()
+	root, err := xmlpath.Parse(in)
+	if err != nil {
+		return Page{}, err
+	}
+	return Page{path, root}, nil
+}
+
+// ID returns the ID of a page.
+// The ID of a page is the page's basename.
+func (p Page) ID() string {
+	return filepath.Base(p.path)
+}
+
+// Polygon returns the page's print-space.
+func (p Page) Polygon() (Polygon, error) {
+	xpath := xmlpath.MustCompile("/PcGts/Page/PrintSpace")
+	i := xpath.Iter(p.root)
+	if !i.Next() {
+		return Polygon{}, fmt.Errorf("missing PrintSpace for %s", p.path)
+	}
+	return newPolygon(i.Node())
+}
+
+// TextEquivUnicodeAt returns the i-th TextEquiv/Unicode entry
+// for each of the page's regions, separated by \n\n.
+func (p Page) TextEquivUnicodeAt(pos int) (string, bool) {
+	var b strings.Builder
+	var pre string
+	for _, r := range p.Regions() {
+		region, ok := r.TextEquivUnicodeAt(pos)
+		if !ok {
+			return "", false
+		}
+		b.WriteString(pre)
+		b.WriteString(region)
+		pre = "\n\n"
+	}
+	return b.String(), false
+}
+
 // Find searches for a given {region,line,word}-ID in the PAGE-XML
 // (IDs are assumed to be unique).
 func (p Page) Find(m Match) (TextRegion, bool) {
@@ -157,13 +175,13 @@ func (p Page) Find(m Match) (TextRegion, bool) {
 // Regions returns a slice with all RegionRefIndexed elements
 func (p Page) Regions() []Region {
 	var regions []Region
-	for i := regionRefIndexedXPath.Iter(p.root); i.Next(); {
-		region, err := newRegion(p.root, i.Node())
+	iterate(regionRefIndexedXPath, p.root, func(node *xmlpath.Node) {
+		region, err := newRegion(p.root, node)
 		if err != nil { // skip erroneous nodes
-			continue
+			return
 		}
 		regions = append(regions, region)
-	}
+	})
 	sort.Slice(regions, func(i, j int) bool {
 		return regions[i].index < regions[j].index
 	})
@@ -178,6 +196,14 @@ func (p Page) FindRegionByID(id string) (Region, bool) {
 		}
 	}
 	return Region{}, false
+}
+
+// EachSubRegion calls the given callback function for
+// each sub region (region) of the page.
+func (p Page) EachSubRegion(f func(TextRegion)) {
+	for _, r := range p.Regions() {
+		f(r)
+	}
 }
 
 // Region defines a text region in the page XML file.

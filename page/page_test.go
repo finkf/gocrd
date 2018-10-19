@@ -3,12 +3,28 @@ package page
 import (
 	"fmt"
 	"image"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
 const (
 	testPageXML = "testdata/kant_aufklaerung_1784_0020.xml"
+	goldTXT     = "testdata/kant_aufklaerung_1784_0020.txt"
 )
+
+func gold() string {
+	is, err := os.Open(goldTXT)
+	if err != nil {
+		panic(err)
+	}
+	defer is.Close()
+	bs, err := ioutil.ReadAll(is)
+	if err != nil {
+		panic(err)
+	}
+	return string(bs)
+}
 
 func withOpenPage(f func(page Page)) {
 	page, err := Open(testPageXML)
