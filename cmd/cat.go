@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/finkf/gocrd/mets"
@@ -17,6 +19,7 @@ var catCMD = &cobra.Command{
 var (
 	catLevel    string
 	printHeader bool
+	catOut      io.Writer = os.Stdout
 )
 
 func init() {
@@ -50,9 +53,9 @@ func cat(cmd *cobra.Command, args []string) error {
 		}
 		for i := 0; i < len(ls1); i += 2 {
 			if printHeader {
-				fmt.Printf("%s\n", ls1[i])
+				fmt.Fprintf(catOut, "%s\n", ls1[i])
 			}
-			fmt.Printf("%s\n%s", ls1[i+1], ls2[i+1])
+			fmt.Fprintf(catOut, "%s\n%s", ls1[i+1], ls2[i+1])
 		}
 		return nil
 	})
