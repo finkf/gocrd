@@ -139,6 +139,15 @@ func Parse(r io.Reader, id string) (Page, error) {
 	return Page{id, root}, nil
 }
 
+// Metadata looks up keys in the page's Metadata section.
+func (p Page) Metadata(key string) (string, bool) {
+	xpath, err := xmlpath.Compile(fmt.Sprintf("/PcGts/Metadata/%s", key))
+	if err != nil {
+		return "", false
+	}
+	return xpath.String(p.root)
+}
+
 // ID returns the ID of a page.
 // The ID of a page is the page's basename.
 func (p Page) ID() string {

@@ -41,6 +41,31 @@ func TestPage(t *testing.T) {
 	})
 }
 
+func TestPageMetadata(t *testing.T) {
+	withPage(func(page Page) {
+		tests := []struct {
+			key, want string
+			ok        bool
+		}{
+			{"Creator", "OCR-D", true},
+			{"Created", "2016-09-20T11:09:27.431+02:00", true},
+			{"LastChange", "2018-04-25T17:44:49.605+01:00", true},
+			{"Invalid", "", false},
+		}
+		for _, tc := range tests {
+			t.Run(tc.key, func(t *testing.T) {
+				got, ok := page.Metadata(tc.key)
+				if ok != tc.ok {
+					t.Fatalf("expected %t; got %t", tc.ok, ok)
+				}
+				if got != tc.want {
+					t.Fatalf("expected %s; got %s", tc.want, got)
+				}
+			})
+		}
+	})
+}
+
 func TestFindRegionByRefID(t *testing.T) {
 	withPage(func(page Page) {
 		tests := []struct {
