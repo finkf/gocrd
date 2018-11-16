@@ -45,6 +45,7 @@ func TestUnmarshallPcGts(t *testing.T) {
 		want("%d", len(p.Page.TextRegion[0].TextLine), 1, t)
 		want("%d", len(p.Page.TextRegion[0].TextLine[0].BaseLine.Points), 2, t)
 		want("%d", p.Page.TextRegion[0].TextLine[0].BaseLine.Points[1].X, 1025, t)
+		want("%s", p.Page.TextRegion[0].TextLine[0].ID, "tl_1", t)
 		want("%d", len(p.Page.TextRegion[0].TextLine[0].Word), 3, t)
 		want("%f", p.Page.TextRegion[0].TextLine[0].Word[2].TextStyle.FontSize, float32(12.0), t)
 		want("%d", len(p.Page.TextRegion[0].TextLine[0].Word[1].TextEquiv.Unicode), 1, t)
