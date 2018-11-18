@@ -9,7 +9,7 @@ import (
 const testfile = "testdata/kant_aufklaerung_1784_0020.xml"
 
 func withOpenPcGts(path string, f func(p *PcGts)) {
-	p, err := OpenPcGts(path)
+	p, err := Open(path)
 	if err != nil {
 		panic(err)
 	}

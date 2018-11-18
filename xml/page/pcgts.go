@@ -20,17 +20,17 @@ type PcGts struct {
 }
 
 // OpenPcGts reads a new page xml file from the given file path.
-func OpenPcGts(path string) (*PcGts, error) {
+func Open(path string) (*PcGts, error) {
 	is, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer is.Close()
-	return ReadPcGts(is)
+	return Read(is)
 }
 
 // ReadPcGts reads a new page xml file from an input stream.
-func ReadPcGts(r io.Reader) (*PcGts, error) {
+func Read(r io.Reader) (*PcGts, error) {
 	var p PcGts
 	p.Metadata = make(Metadata)
 	if err := xml.NewDecoder(r).Decode(&p); err != nil {
