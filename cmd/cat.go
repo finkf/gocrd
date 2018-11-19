@@ -6,20 +6,19 @@ import (
 	"os"
 	"strings"
 
-	"github.com/finkf/gocrd/mets"
-	"github.com/finkf/gocrd/page"
+	"github.com/finkf/gocrd/xml/mets"
+	"github.com/finkf/gocrd/xml/page"
 	"github.com/spf13/cobra"
 )
 
 var catCMD = &cobra.Command{
 	Use:   "cat",
 	Short: "concatenates two input file groups and prints them to stdout",
-	RunE:  cat,
+	RunE:  runCat,
 }
 var (
 	catLevel    string
 	printHeader bool
-	catOut      io.Writer = os.Stdout
 )
 
 func init() {
@@ -29,19 +28,34 @@ func init() {
 		&printHeader, "header", "H", false, "ouput region id header")
 }
 
-func cat(cmd *cobra.Command, args []string) error {
+func runCat(cmd *cobra.Command, args []string) error {
 	if !levelOK() {
 		return fmt.Errorf("invalid level: %s", catLevel)
 	}
 	if !inputGroupsHaveLen2() {
 		return fmt.Errorf("expected two input file groups (%d given)", len(inputFileGroups))
 	}
-	m, err := mets.Open(metsFile)
+	return cat(os.Stdout, catArgs{
+		mets:        metsFile,
+		level:       catLevel,
+		ifg1:        inputFileGroups[0],
+		ifg2:        inputFileGroups[1],
+		printHeader: printHeader,
+	})
+}
+
+type catArgs struct {
+	mets, level, ifg1, ifg2 string
+	printHeader             bool
+}
+
+func cat(out io.Writer, args catArgs) error {
+	m, err := mets.Open(args.mets)
 	if err != nil {
 		return fmt.Errorf("cannot open mets file: %v", err)
 	}
-	ifg1 := m.Find(mets.Match{Use: inputFileGroups[0]})
-	ifg2 := m.Find(mets.Match{Use: inputFileGroups[1]})
+	ifg1 := m.Find(mets.Match{Use: args.ifg1})
+	ifg2 := m.Find(mets.Match{Use: args.ifg2})
 	err = zip(ifg1, ifg2, func(a, b mets.File) error {
 		ls1, e2 := readRegions(a.FLocat)
 		if e2 != nil {
@@ -52,10 +66,10 @@ func cat(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("cannot read %s: %v", b.FLocat.URL, err)
 		}
 		for i := 0; i < len(ls1); i += 2 {
-			if printHeader {
-				fmt.Fprintf(catOut, "%s\n", ls1[i])
+			if args.printHeader {
+				fmt.Fprintf(out, "%s\n", ls1[i])
 			}
-			fmt.Fprintf(catOut, "%s\n%s", ls1[i+1], ls2[i+1])
+			fmt.Fprintf(out, "%s\n%s", ls1[i+1], ls2[i+1])
 		}
 		return nil
 	})
@@ -68,35 +82,34 @@ func readRegions(f mets.FLocat) ([]string, error) {
 		return nil, err
 	}
 	defer r.Close()
-	p, err := page.Parse(r, f.URL)
+	p, err := page.Read(r)
 	if err != nil {
 		return nil, err
 	}
 	var res []string
-	p.EachSubRegion(func(r page.TextRegion) {
+	for _, region := range p.Page.TextRegion {
 		if strings.ToLower(catLevel) == "region" {
-			res = append(res, r.ID(), regionString(r))
-			return
+			res = append(res, region.ID, regionString(region.TextEquiv))
+			continue
 		}
-		r.EachSubRegion(func(r page.TextRegion) {
+		for _, line := range region.TextLine {
 			if strings.ToLower(catLevel) == "line" {
-				res = append(res, r.ID(), regionString(r))
-				return
+				res = append(res, line.ID, regionString(line.TextEquiv))
+				continue
 			}
-			r.EachSubRegion(func(r page.TextRegion) {
-				res = append(res, r.ID(), regionString(r))
-			})
-		})
-	})
+			for _, word := range line.Word {
+				res = append(res, word.ID, regionString(word.TextEquiv))
+			}
+		}
+	}
 	return res, nil
 }
 
-func regionString(r page.TextRegion) string {
-	line, ok := r.TextEquivUnicodeAt(0)
-	if !ok {
+func regionString(t page.TextEquiv) string {
+	if len(t.Unicode) == 0 {
 		return ""
 	}
-	return strings.Replace(line, "\n", " ", -1)
+	return strings.Replace(t.Unicode[0], "\n", " ", -1)
 }
 
 func levelOK() bool {
