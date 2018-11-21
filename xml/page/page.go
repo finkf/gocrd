@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"time"
 )
 
 //<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
@@ -16,7 +17,7 @@ import (
 type PcGts struct {
 	Attributes []xml.Attr
 	Metadata   Metadata `xml:"Metadata"`
-	Page       Page     `xml:"page"`
+	Page       Page     `xml:"Page"`
 }
 
 // OpenPcGts reads a new page xml file from the given file path.
@@ -63,7 +64,7 @@ func (p *PcGts) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 // Metadata defines
 type Metadata map[string]string
 
-// UnmarshalXML unmarshals the Metadata of a PcGts structure.
+// UnmarshalXML unmarshals the Metadata of a PcGts structure from xml.
 func (m Metadata) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var node string
 	var err error
@@ -82,6 +83,32 @@ func (m Metadata) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		}
 	}
 	return ignoreEOF(err)
+}
+
+// MarshalXML marshals the Metadata of a PcGts structure to xml.
+// <Metadata>
+// <Creator>OCR-D</Creator>
+// ...
+// </Metadata>
+func (m Metadata) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	selem := xml.StartElement{Name: xml.Name{Local: "Metadata"}}
+	if err := e.EncodeToken(selem); err != nil {
+		return err
+	}
+	m["LastChange"] = time.Now().Format(time.RFC3339)
+	for k, v := range m {
+		name := xml.Name{Local: k}
+		if err := e.EncodeToken(xml.StartElement{Name: name}); err != nil {
+			return err
+		}
+		if err := e.EncodeToken(xml.CharData(v)); err != nil {
+			return err
+		}
+		if err := e.EncodeToken(xml.EndElement{Name: name}); err != nil {
+			return err
+		}
+	}
+	return e.EncodeToken(xml.EndElement{Name: selem.Name})
 }
 
 // Page is a page in a PcGts structure.
@@ -121,7 +148,6 @@ type RegionRefIndexed struct {
 // TextRegionBase defines the base data structure for
 // all text regions (TextRegion, Line, Word, Glyph) in a page XML document.
 type TextRegionBase struct {
-	Type      string `xml:"type,attr"`
 	ID        string `xml:"id,attr"`
 	Custom    string `xml:"custom,attr"`
 	Coords    Coords
@@ -132,6 +158,7 @@ type TextRegionBase struct {
 // TextRegion is a region of text (paragraph, block, ...)
 type TextRegion struct {
 	TextRegionBase
+	Type     string `xml:"type,attr"`
 	TextLine []TextLine
 }
 
@@ -155,13 +182,13 @@ type Glyph struct {
 
 // TextStyle specifies font information of any text region.
 type TextStyle struct {
-	FontFamaily  string  `xml:"fontFamily,attr"`
-	Serif        bool    `xml:"serif,attr"`
-	Monospace    bool    `xml:"monospace,attr"`
-	FontSize     float32 `xml:"fontSize,attr"`
-	Kerning      int     `xml:"kerning,attr"`
-	TextColor    string  `xml:"textColour,attr"`
-	TextColorRGB int     `xml:"textColourRgb,attr"`
+	FontFamaily  string  `xml:"fontFamily,attr,omitempty"`
+	Serif        bool    `xml:"serif,attr,omitempty"`
+	Monospace    bool    `xml:"monospace,attr,omitempty"`
+	FontSize     float32 `xml:"fontSize,attr,omitempty"`
+	Kerning      int     `xml:"kerning,attr,omitempty"`
+	TextColor    string  `xml:"textColour,attr,omitempty"`
+	TextColorRGB int     `xml:"textColourRgb,attr,omitempty"`
 	/* ... */
 }
 
@@ -177,12 +204,12 @@ type Coords struct {
 }
 
 // BoundingBox returns the bounding box of the polygon.
-func (p Coords) BoundingBox() image.Rectangle {
+func (c Coords) BoundingBox() image.Rectangle {
 	minx := math.MaxInt64
 	maxx := math.MinInt64
 	miny := math.MaxInt64
 	maxy := math.MinInt64
-	for _, p := range p.Points {
+	for _, p := range c.Points {
 		if p.X < minx {
 			minx = p.X
 		}
@@ -214,6 +241,25 @@ func (c *Coords) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		}
 	}
 	return d.Skip()
+}
+
+// MarshalXML marshals a Coords instance.
+// <Coords points="x0,y0 x1,y1 x2,y2,..."/>
+func (c *Coords) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	var b strings.Builder
+	var pre string
+	for _, p := range c.Points {
+		b.WriteString(fmt.Sprintf("%s%d,%d", pre, p.X, p.Y))
+		pre = " "
+	}
+	selem := xml.StartElement{
+		Name: xml.Name{Local: "Coords"},
+		Attr: []xml.Attr{xml.Attr{Name: xml.Name{Local: "points"}, Value: b.String()}},
+	}
+	if err := e.EncodeToken(selem); err != nil {
+		return err
+	}
+	return e.EncodeToken(xml.EndElement{Name: selem.Name})
 }
 
 func ignoreEOF(err error) error {
