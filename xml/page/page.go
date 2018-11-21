@@ -20,7 +20,7 @@ type PcGts struct {
 	Page       Page     `xml:"Page"`
 }
 
-// OpenPcGts reads a new page xml file from the given file path.
+// Open reads a new page xml file from the given file path.
 func Open(path string) (*PcGts, error) {
 	is, err := os.Open(path)
 	if err != nil {
@@ -30,7 +30,7 @@ func Open(path string) (*PcGts, error) {
 	return Read(is)
 }
 
-// ReadPcGts reads a new page xml file from an input stream.
+// Read reads a new page xml file from an input stream.
 func Read(r io.Reader) (*PcGts, error) {
 	var p PcGts
 	p.Metadata = make(Metadata)
