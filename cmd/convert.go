@@ -158,8 +158,7 @@ func (c *ocropyBookToPageXML) readTrimmedGTLine(imgpath string, i int) (gt, file
 	if err != nil {
 		return "", "", fmt.Errorf("cannot read gt for line %s/%d: %v", imgpath, i, err)
 	}
-	return strings.Trim(string(bgt), " \n\t\r\v"), gtfile, nil
-
+	return strings.Trim(string(bgt), " \n\t\r\v"), path.Join(imgpath, path.Base(gtfile)), nil
 }
 
 func (c *ocropyBookToPageXML) nextPage(old *page.PcGts, e hocr.Element) (*page.PcGts, error) {
