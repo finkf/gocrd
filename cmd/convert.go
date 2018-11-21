@@ -175,6 +175,7 @@ func (c *ocropyBookToPageXML) nextPage(old *page.PcGts, e hocr.Element) (*page.P
 	bb := e.BBox()
 	coords := page.Coords{Points: []image.Point{bb.Min, bb.Max}}
 	return &page.PcGts{
+		Attributes: page.PcGtsXMLHeader,
 		Metadata: page.Metadata{
 			"Creator": "GOCRD",
 			"Created": time.Now().Format(time.RFC3339),
@@ -200,11 +201,6 @@ func (c *ocropyBookToPageXML) nextPage(old *page.PcGts, e hocr.Element) (*page.P
 
 func (c *ocropyBookToPageXML) writePageXML(p *page.PcGts) error {
 	opath := path.Join(c.odir, stripPathExtension(path.Base(p.Page.ImageFilename))+".xml")
-	// out, err := os.Create(opath)
-	// if err != nil {
-	// 	return fmt.Errorf("cannot write page xml: %v", err)
-	// }
-	// defer out.Close()
 	xml, err := xml.MarshalIndent(p, "  ", " ")
 	if err != nil {
 		return fmt.Errorf("cannot write page xml: %v", err)
