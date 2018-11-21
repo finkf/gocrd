@@ -11,13 +11,35 @@ import (
 	"time"
 )
 
-//<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15 http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd">
+// XML namespace, schema instance and location.
+const (
+	XMLNameSpace      = "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15"
+	XMLSchemaInstance = "http://www.w3.org/2001/XMLSchema-instance"
+	XMLSchemaLocation = "http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15" +
+		" http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15/pagecontent.xsd"
+)
+
+// PcGtsXMLHeader defines the default xml namespace header.
+var PcGtsXMLHeader = []xml.Attr{
+	xml.Attr{
+		Name:  xml.Name{Local: "xmlns"},
+		Value: XMLNameSpace,
+	},
+	xml.Attr{
+		Name:  xml.Name{Space: "xmlns", Local: "xsi"},
+		Value: XMLSchemaInstance,
+	},
+	xml.Attr{
+		Name:  xml.Name{Space: "xsi", Local: "schemaLocation"},
+		Value: XMLSchemaLocation,
+	},
+}
 
 // PcGts is the top level node of page XML files.
 type PcGts struct {
-	Attributes []xml.Attr
-	Metadata   Metadata `xml:"Metadata"`
-	Page       Page     `xml:"Page"`
+	Attributes []xml.Attr `xml:",attr"`
+	Metadata   Metadata   `xml:"Metadata"`
+	Page       Page       `xml:"Page"`
 }
 
 // Open reads a new page xml file from the given file path.
