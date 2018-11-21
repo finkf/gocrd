@@ -200,7 +200,7 @@ func (c *ocropyBookToPageXML) nextPage(old *page.PcGts, e hocr.Element) (*page.P
 
 func (c *ocropyBookToPageXML) writePageXML(p *page.PcGts) error {
 	opath := path.Join(c.odir, stripPathExtension(path.Base(p.Page.ImageFilename))+".xml")
-	xml, err := xml.MarshalIndent(p, "  ", " ")
+	xml, err := xml.MarshalIndent(p, "\t", "\t")
 	if err != nil {
 		return fmt.Errorf("cannot write page xml: %v", err)
 	}
