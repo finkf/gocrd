@@ -2,7 +2,6 @@ package hocr // import "github.com/finkf/gocrd/xml/hocr"
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 	"image"
 	"io"
@@ -16,10 +15,6 @@ const (
 	ClassLine = "ocr_line"
 	ClassWord = "ocrx_word"
 )
-
-// ErrNotFound is the error that is returned if
-// a attribute of an element could not found.
-var ErrNotFound = errors.New("not found")
 
 // Scanner is a low-level scanner for hOCR documents.
 type Scanner struct {
@@ -123,16 +118,18 @@ func (e Element) BBox() image.Rectangle {
 func (e Element) Scanf(attr, key, format string, args ...interface{}) (int, error) {
 	val, found := findAttr(e.Node.Attr, attr)
 	if !found {
-		return 0, ErrNotFound
+		return 0, fmt.Errorf("cannot find attribute: %s", attr)
 	}
 	var spos, epos int
 	if spos = strings.Index(val, key); spos == -1 {
-		return 0, ErrNotFound
+		return 0, fmt.Errorf("cannot find key: %s", key)
 	}
 	spos += len(key) + 1
 	epos = strings.Index(val[spos:], ";")
 	if epos == -1 {
 		epos = len(val)
+	} else {
+		epos += spos
 	}
 	return fmt.Sscanf(val[spos:epos], format, args...)
 }

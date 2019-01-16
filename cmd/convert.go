@@ -40,7 +40,7 @@ func convert(cmd *cobra.Command, args []string) error {
 	// create output directory
 	if odir != "./" {
 		if err := os.MkdirAll(odir, os.ModePerm); err != nil && !os.IsExist(err) {
-			return fmt.Errorf("cannot create ouput directory %s: %v", odir, err)
+			return fmt.Errorf("cannot create ouput directory %q: %v", odir, err)
 		}
 	}
 	// create convert
@@ -63,7 +63,7 @@ type converter interface {
 
 func newConverter(from, to string) (converter, error) {
 	if from != "OcropyBook" || to != "PageXML" {
-		return nil, fmt.Errorf("cannot convert from %s to %s", from, to)
+		return nil, fmt.Errorf("cannot convert from %q to %q", from, to)
 	}
 	return &ocropyBookToPageXML{odir: odir}, nil
 }
@@ -76,13 +76,13 @@ type ocropyBookToPageXML struct {
 func (c *ocropyBookToPageXML) convert(input string) error {
 	is, err := os.Open(input)
 	if err != nil {
-		return fmt.Errorf("cannot convert %s: %v", input, err)
+		return fmt.Errorf("cannot convert %q: %v", input, err)
 	}
 	defer is.Close()
 	c.scanner = hocr.NewScanner(is)
 	c.bdir = path.Dir(input)
 	if err := c.doConvert(); err != nil {
-		return fmt.Errorf("cannot convert %s: %v", input, err)
+		return fmt.Errorf("cannot convert %q: %v", input, err)
 	}
 	return nil
 }
@@ -95,16 +95,15 @@ func (c *ocropyBookToPageXML) doConvert() error {
 			continue
 		}
 		e := c.scanner.Node().(hocr.Element)
-		if e.Class == hocr.ClassPage {
+		switch e.Class {
+		case hocr.ClassPage:
 			var err error
 			page, err = c.nextPage(page, e)
 			if err != nil {
 				return err
 			}
 			i = 0
-			continue
-		}
-		if e.Class == hocr.ClassLine {
+		case hocr.ClassLine:
 			i++
 			if err := c.addGTLine(&page.Page, i, e); err != nil {
 				return err
@@ -119,6 +118,14 @@ func (c *ocropyBookToPageXML) addGTLine(p *page.Page, i int, e hocr.Element) err
 	if err != nil {
 		return err
 	}
+	// append lines to text region
+	if len(p.TextRegion[0].TextEquiv.Unicode) == 0 {
+		p.TextRegion[0].TextEquiv.Unicode = append(
+			p.TextRegion[0].TextEquiv.Unicode, gt)
+	} else {
+		p.TextRegion[0].TextEquiv.Unicode[0] += "\n" + gt
+	}
+	// add line
 	bbox := e.BBox()
 	coords := page.Coords{Points: []image.Point{bbox.Min, bbox.Max}}
 	line := page.TextLine{
@@ -129,6 +136,7 @@ func (c *ocropyBookToPageXML) addGTLine(p *page.Page, i int, e hocr.Element) err
 			TextEquiv: page.TextEquiv{Unicode: []string{gt}},
 		},
 	}
+	// add words
 	c.addGTWords(&line, gt)
 	p.TextRegion[0].TextLine = append(p.TextRegion[0].TextLine, line)
 	return nil
@@ -199,12 +207,13 @@ func (c *ocropyBookToPageXML) nextPage(old *page.PcGts, e hocr.Element) (*page.P
 }
 
 func (c *ocropyBookToPageXML) writePageXML(p *page.PcGts) error {
+	const filemode = os.FileMode(0666)
 	opath := path.Join(c.odir, stripPathExtension(path.Base(p.Page.ImageFilename))+".xml")
 	xml, err := xml.MarshalIndent(p, "\t", "\t")
 	if err != nil {
 		return fmt.Errorf("cannot write page xml: %v", err)
 	}
-	if err := ioutil.WriteFile(opath, xml, os.ModePerm); err != nil {
+	if err := ioutil.WriteFile(opath, xml, filemode); err != nil {
 		return fmt.Errorf("cannot write page xml: %v", err)
 	}
 	return nil
