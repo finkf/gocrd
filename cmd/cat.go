@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var catCMD = &cobra.Command{
+var catCommand = &cobra.Command{
 	Use:   "cat",
 	Short: "Print and concatenate page XML formatted files.",
 	Long: `Print and concatenate page XML formatted files.
@@ -35,13 +35,13 @@ var catArgs struct {
 }
 
 func init() {
-	catCMD.PersistentFlags().StringVarP(
+	catCommand.PersistentFlags().StringVarP(
 		&catArgs.mets, "mets", "m", "mets.xml", "path to the METS file")
-	catCMD.PersistentFlags().StringArrayVarP(
+	catCommand.PersistentFlags().StringArrayVarP(
 		&catArgs.ifgs, "input-file-grp", "I", nil, "input file groups")
-	catCMD.Flags().StringVarP(
+	catCommand.Flags().StringVarP(
 		&catArgs.level, "level", "l", "line", "set level of output regions [region|line|word]")
-	catCMD.Flags().BoolVarP(
+	catCommand.Flags().BoolVarP(
 		&catArgs.printHeader, "header", "H", false, "ouput region id header")
 }
 
