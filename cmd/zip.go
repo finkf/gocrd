@@ -52,6 +52,6 @@ func zip(in io.Reader, out io.Writer) error {
 }
 
 func printZip(out io.Writer, a, b string) error {
-	_, err := fmt.Fprintf(out, "%s%s%s", a, zipArgs.delim, b)
+	_, err := fmt.Fprintf(out, "%s%s%s\n", a, zipArgs.delim, b)
 	return err
 }
