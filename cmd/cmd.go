@@ -19,12 +19,9 @@ var (
 )
 
 func init() {
-	rootCMD.PersistentFlags().StringVarP(
-		&metsFile, "mets", "m", "mets.xml", "path to the workspace's mets file")
-	rootCMD.PersistentFlags().StringArrayVarP(
-		&inputFileGroups, "input-file-grp", "I", nil, "input file groups")
 	rootCMD.AddCommand(catCMD)
 	rootCMD.AddCommand(convertCommand)
+	rootCMD.AddCommand(zipCommand)
 }
 
 func must(err error) {
