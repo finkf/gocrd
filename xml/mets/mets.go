@@ -96,9 +96,9 @@ type FLocat struct {
 // Open opens a reader to the FLocat.
 // Currently only URL's are supported.
 func (f FLocat) Open() (io.ReadCloser, error) {
-	if f.Type != "URL" {
-		return nil, fmt.Errorf("open: unsupported LOCTYPE: %s", f.Type)
-	}
+	// if f.Type != "URL" {
+	// 	return nil, fmt.Errorf("open: unsupported LOCTYPE: %s", f.Type)
+	// }
 	if strings.HasPrefix(f.URL, "file://") {
 		return os.Open(f.URL[7:])
 	}
