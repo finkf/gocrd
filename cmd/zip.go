@@ -10,7 +10,7 @@ import (
 )
 
 var zipCommand = &cobra.Command{
-	Use:   "cat",
+	Use:   "zip",
 	Short: "Zip a stream.",
 	Long: `Zip a stream.
 
