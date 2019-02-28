@@ -13,8 +13,19 @@ import (
 
 var catCMD = &cobra.Command{
 	Use:   "cat",
-	Short: "concatenates two input file groups and prints them to stdout",
-	RunE:  runCat,
+	Short: "Print and concatenate page XML formatted files.",
+	Long: `Print and concatenate page XML formatted files.
+
+You can either specify the files as additional command line arguments
+or as input file groups.  If input file groups are used, the according
+mets file must be specified (thedefault can be used, though).  The
+files of the input file groups are printed in sorted order of their
+file names and in order of the specified input file groups given on
+the command line.
+
+If both input files and input file groups are given, first the input
+files, then the input file groups are handled.`,
+	RunE: runCat,
 }
 var (
 	catLevel    string
