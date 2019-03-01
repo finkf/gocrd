@@ -16,9 +16,9 @@ var zipCommand = &cobra.Command{
 	Long: `Zip a stream.
 
 The first half of the input lines are zipped together with the second
-half of the input lines.`,
-	RunE: runZip,
-}
+half of the input lines.  Zip first reads all input lines into memory
+before it can write them out.`,
+	RunE: runZip}
 
 var zipArgs struct {
 	delim string
