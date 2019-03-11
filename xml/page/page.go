@@ -255,11 +255,11 @@ func (c *Coords) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			continue
 		}
 		for _, xy := range strings.Fields(attr.Value) {
-			var x, y int
-			if _, err := fmt.Sscanf(xy, "%d,%d", &x, &y); err != nil {
+			var x, y float64
+			if _, err := fmt.Sscanf(xy, "%f,%f", &x, &y); err != nil {
 				return fmt.Errorf("invalid xy pair %q in %q", xy, attr.Value)
 			}
-			c.Points = append(c.Points, image.Point{X: x, Y: y})
+			c.Points = append(c.Points, image.Point{X: int(x), Y: int(y)})
 		}
 	}
 	return d.Skip()
