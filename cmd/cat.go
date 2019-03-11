@@ -59,11 +59,11 @@ func cat(out io.Writer, args catArgs) error {
 	err = zip(ifg1, ifg2, func(a, b mets.File) error {
 		ls1, e2 := readRegions(a.FLocat)
 		if e2 != nil {
-			return fmt.Errorf("cannot read %s: %v", a.FLocat.URL, err)
+			return fmt.Errorf("cannot read %s: %v", a.FLocat.URL, e2)
 		}
 		ls2, e2 := readRegions(b.FLocat)
 		if e2 != nil {
-			return fmt.Errorf("cannot read %s: %v", b.FLocat.URL, err)
+			return fmt.Errorf("cannot read %s: %v", b.FLocat.URL, e2)
 		}
 		for i := 0; i < len(ls1); i += 2 {
 			if args.printHeader {
