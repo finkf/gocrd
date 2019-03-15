@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/finkf/gocrd/xml/mets"
@@ -11,98 +12,170 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var catCMD = &cobra.Command{
-	Use:   "cat",
-	Short: "concatenates two input file groups and prints them to stdout",
-	RunE:  runCat,
+var catCommand = &cobra.Command{
+	Use:   "cat [flags] [files...]",
+	Short: "concatenates the contents of PageXML files to stdout",
+	RunE:  runCatFunc,
 }
+
+const catDefaultFormat = "%R:"
+
 var (
-	catLevel    string
-	printHeader bool
+	catFormat             = catDefaultFormat
+	catLevel              string
+	catPrefix             bool
+	catFormatFileID       string
+	catFormatInputFileGrp string
+	catFormatRegionID     string
+	catFormatN            int
 )
 
 func init() {
-	catCMD.Flags().StringVarP(
+	catCommand.Flags().StringVarP(
+		&metsFile, "mets", "m", "mets.xml", "path to the workspace's mets file")
+	catCommand.Flags().StringArrayVarP(
+		&inputFileGrps, "input-file-grp", "I", nil, "input file groups")
+	catCommand.Flags().StringVarP(
 		&catLevel, "level", "l", "line", "set level of output regions [region|line|word]")
-	catCMD.Flags().BoolVarP(
-		&printHeader, "header", "H", false, "ouput region id header")
+	catCommand.Flags().BoolVarP(
+		&catPrefix, "prefix", "p", false, "ouput default prefix")
+	catCommand.Flags().StringVarP(
+		&catFormat, "format", "f", catFormat, "set formatting for prefix")
 }
 
-func runCat(cmd *cobra.Command, args []string) error {
+func runCatFunc(cmd *cobra.Command, args []string) error {
+	return runCat(args, os.Stdout)
+}
+
+func runCat(args []string, stdout io.Writer) error {
 	if !levelOK() {
 		return fmt.Errorf("invalid level: %s", catLevel)
 	}
-	if !inputGroupsHaveLen2() {
-		return fmt.Errorf("expected two input file groups (%d given)", len(inputFileGroups))
+	for _, ifg := range inputFileGrps {
+		if err := catInputFileGrp(ifg, stdout); err != nil {
+			return err
+		}
 	}
-	return cat(os.Stdout, catArgs{
-		mets:        metsFile,
-		level:       catLevel,
-		ifg1:        inputFileGroups[0],
-		ifg2:        inputFileGroups[1],
-		printHeader: printHeader,
-	})
+	for _, arg := range args {
+		if err := catFile(arg, stdout); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-type catArgs struct {
-	mets, level, ifg1, ifg2 string
-	printHeader             bool
-}
-
-func cat(out io.Writer, args catArgs) error {
-	m, err := mets.Open(args.mets)
+func catFile(p string, stdout io.Writer) error {
+	is, err := os.Open(p)
 	if err != nil {
-		return fmt.Errorf("cannot open mets file: %v", err)
+		return err
 	}
-	ifg1 := m.Find(mets.Match{Use: args.ifg1})
-	ifg2 := m.Find(mets.Match{Use: args.ifg2})
-	err = zip(ifg1, ifg2, func(a, b mets.File) error {
-		ls1, e2 := readRegions(a.FLocat)
-		if e2 != nil {
-			return fmt.Errorf("cannot read %s: %v", a.FLocat.URL, e2)
+	defer is.Close()
+	catFormatFileID = p
+	catFormatInputFileGrp = path.Dir(p)
+	return cat(is, stdout)
+}
+
+func catInputFileGrp(ifg string, stdout io.Writer) error {
+	m, err := mets.Open(metsFile)
+	if err != nil {
+		return err
+	}
+	catFormatInputFileGrp = ifg
+	for _, file := range m.FindFileGrp(ifg) {
+		is, err := m.Open(file)
+		if err != nil {
+			return err
 		}
-		ls2, e2 := readRegions(b.FLocat)
-		if e2 != nil {
-			return fmt.Errorf("cannot read %s: %v", b.FLocat.URL, e2)
+		defer is.Close()
+		catFormatFileID = file.ID
+		if err = cat(is, stdout); err != nil {
+			return err
 		}
-		for i := 0; i < len(ls1); i += 2 {
-			if args.printHeader {
-				fmt.Fprintf(out, "%s\n", ls1[i])
+	}
+	return nil
+}
+
+func cat(is io.Reader, stdout io.Writer) error {
+	p, err := page.Read(is)
+	if err != nil {
+		return err
+	}
+	return catPage(p.Page, stdout)
+}
+
+func catPage(p page.Page, stdout io.Writer) error {
+	// cat level is either region, word or glyph
+	pregion := strings.ToLower(catLevel) == "region"
+	pline := strings.ToLower(catLevel) == "line"
+
+	for _, region := range p.TextRegion {
+		if pregion {
+			catFormatRegionID = region.ID
+			if err := catprint(stdout, regionString(region.TextEquiv)); err != nil {
+				return err
 			}
-			fmt.Fprintf(out, "%s\n%s", ls1[i+1], ls2[i+1])
-		}
-		return nil
-	})
-	return err
-}
-
-func readRegions(f mets.FLocat) ([]string, error) {
-	r, err := f.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-	p, err := page.Read(r)
-	if err != nil {
-		return nil, err
-	}
-	var res []string
-	for _, region := range p.Page.TextRegion {
-		if strings.ToLower(catLevel) == "region" {
-			res = append(res, region.ID, regionString(region.TextEquiv))
 			continue
 		}
 		for _, line := range region.TextLine {
-			if strings.ToLower(catLevel) == "line" {
-				res = append(res, line.ID, regionString(line.TextEquiv))
+			if pline {
+				catFormatRegionID = line.ID
+				if err := catprint(stdout, regionString(line.TextEquiv)); err != nil {
+					return err
+				}
 				continue
 			}
 			for _, word := range line.Word {
-				res = append(res, word.ID, regionString(word.TextEquiv))
+				catFormatRegionID = word.ID
+				if err := catprint(stdout, regionString(word.TextEquiv)); err != nil {
+					return err
+				}
 			}
 		}
 	}
-	return res, nil
+	return nil
+}
+
+func catprint(stdout io.Writer, line string) error {
+	if catPrefix || catFormat != catDefaultFormat {
+		return catprintf(stdout, line)
+	}
+	_, err := fmt.Fprintln(stdout, line)
+	return err
+}
+
+var catPrefixBuilder strings.Builder
+
+func catprintf(stdout io.Writer, line string) error {
+	catFormatN++
+	catPrefixBuilder.Reset()
+	var haveFormat bool
+	for _, r := range catFormat {
+		if haveFormat {
+			switch r {
+			case 'N':
+				catPrefixBuilder.WriteString(fmt.Sprintf("%d", catFormatN))
+			case 'G':
+				catPrefixBuilder.WriteString(catFormatInputFileGrp)
+			case 'F':
+				catPrefixBuilder.WriteString(catFormatFileID)
+			case 'R':
+				catPrefixBuilder.WriteString(catFormatRegionID)
+			case '%':
+				catPrefixBuilder.WriteRune('%')
+			default:
+				return fmt.Errorf("invalid format: %%%c", r)
+			}
+			haveFormat = false
+			continue
+		}
+		if r == '%' {
+			haveFormat = true
+			continue
+		}
+		catPrefixBuilder.WriteRune(r)
+	}
+	_, err := fmt.Fprintf(stdout, "%s%s\n", catPrefixBuilder.String(), line)
+	return err
 }
 
 func regionString(t page.TextEquiv) string {
@@ -114,33 +187,9 @@ func regionString(t page.TextEquiv) string {
 
 func levelOK() bool {
 	switch strings.ToLower(catLevel) {
-	case "line":
-		return true
-	case "region":
-		return true
-	case "word":
+	case "line", "region", "word":
 		return true
 	default:
 		return false
 	}
-}
-
-func inputGroupsHaveLen2() bool {
-	return len(inputFileGroups) == 2
-}
-
-func zip(a, b []mets.File, f func(mets.File, mets.File) error) error {
-	for i := 0; i < min(len(a), len(b)); i++ {
-		if err := f(a[i], b[i]); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

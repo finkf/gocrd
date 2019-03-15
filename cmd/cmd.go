@@ -14,17 +14,14 @@ var rootCMD = &cobra.Command{
 	SilenceErrors: true,
 }
 var (
-	metsFile        string
-	inputFileGroups []string
+	metsFile      string
+	inputFileGrps []string
 )
 
 func init() {
-	rootCMD.PersistentFlags().StringVarP(
-		&metsFile, "mets", "m", "mets.xml", "path to the workspace's mets file")
-	rootCMD.PersistentFlags().StringArrayVarP(
-		&inputFileGroups, "input-file-grp", "I", nil, "input file groups")
-	rootCMD.AddCommand(catCMD)
+	rootCMD.AddCommand(catCommand)
 	rootCMD.AddCommand(convertCommand)
+	rootCMD.AddCommand(replaceCommand)
 }
 
 func must(err error) {

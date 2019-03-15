@@ -1,3 +1,5 @@
+github.com/finkf/lev v0.1.1 h1:WkdvpEQ46VzCTNodj6gxi+avXN2S11hUTSaPf5cwZLA=
+github.com/finkf/lev v0.1.1/go.mod h1:BtEWwlMH2AT8fXvO1VoUmClZyUyrivS/37S2hgVwV8k=
 github.com/finkf/testdata v0.1.2 h1:jTveaMZF9VYqL6+IDOfewj+JrtOIzCBK+w5hkQlLBSQ=
 github.com/finkf/testdata v0.1.2/go.mod h1:2IO5QaNz7bSuXc9JtgLOqvRvPdBfKFyL7SGyII1k0NA=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=

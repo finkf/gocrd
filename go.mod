@@ -1,6 +1,7 @@
 module github.com/finkf/gocrd
 
 require (
+	github.com/finkf/lev v0.1.1
 	github.com/finkf/testdata v0.1.2
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/spf13/cobra v0.0.3

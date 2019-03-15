@@ -62,10 +62,15 @@ type converter interface {
 }
 
 func newConverter(from, to string) (converter, error) {
-	if from != "OcropyBook" || to != "PageXML" {
-		return nil, fmt.Errorf("cannot convert from %q to %q", from, to)
+	if to != "PageXML" {
+		return nil, fmt.Errorf("cannot convert to %q", to)
 	}
-	return &ocropyBookToPageXML{odir: odir}, nil
+	switch from {
+	case "OcropyBook":
+		return &ocropyBookToPageXML{odir: odir}, nil
+	default:
+		return nil, fmt.Errorf("cannot convert from %q", from)
+	}
 }
 
 type ocropyBookToPageXML struct {
