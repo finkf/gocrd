@@ -17,6 +17,25 @@ func withOpenHOCRScanner(path string, f func(*Scanner)) {
 	f(s)
 }
 
+func TestScanTitle(t *testing.T) {
+	withOpenHOCRScanner("testdata/test.html", func(s *Scanner) {
+		want := "OCR Results"
+		for s.Scan() {
+			title, ok := s.Node().(Title)
+			if !ok {
+				continue
+			}
+			if string(title) != want {
+				t.Fatalf("expected %s; got %s", want, title)
+			}
+			break
+		}
+		if s.Err() != nil {
+			t.Fatalf("got error: %v", s.Err())
+		}
+	})
+}
+
 func TestScanLines(t *testing.T) {
 	tests := []struct {
 		want string
@@ -48,7 +67,6 @@ func TestScanLines(t *testing.T) {
 				if s.Err() != nil {
 					t.Fatalf("got error: %v", s.Err())
 				}
-
 			})
 		})
 	}
