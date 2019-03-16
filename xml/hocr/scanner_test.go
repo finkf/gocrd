@@ -17,6 +17,43 @@ func withOpenHOCRScanner(path string, f func(*Scanner)) {
 	f(s)
 }
 
+func TestScanLines(t *testing.T) {
+	tests := []struct {
+		want string
+		i    int
+	}{
+		{"muͤts / welches ich nebend anderem gunſt", 1},
+		{"vñ freiindtlicher zůͤredte / ſo ſy mir vnerkan⸗", 2},
+		{"ſchenckten", 29},
+	}
+	for _, tc := range tests {
+		t.Run(fmt.Sprintf("%s", tc.want), func(t *testing.T) {
+			withOpenHOCRScanner("testdata/test.html", func(s *Scanner) {
+				var i int
+				for s.Scan() {
+					if e, ok := s.Node().(Element); !ok || e.Class != ClassLine {
+						continue
+					}
+					i++
+					if i == tc.i {
+						if !s.Scan() {
+							t.Fatalf("cannot read char data for line %d", tc.i)
+						}
+						if got := string(s.Node().(Text)); got != tc.want {
+							t.Fatalf("expected %s; got %s", tc.want, got)
+						}
+						break
+					}
+				}
+				if s.Err() != nil {
+					t.Fatalf("got error: %v", s.Err())
+				}
+
+			})
+		})
+	}
+}
+
 func TestScannerBBox(t *testing.T) {
 	tests := []struct {
 		class string
