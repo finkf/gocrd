@@ -18,9 +18,10 @@ const (
 
 // Scanner is a low-level scanner for hOCR documents.
 type Scanner struct {
-	d   *xml.Decoder
-	err error
-	n   Node
+	d     *xml.Decoder
+	err   error
+	node  Node
+	stack stack
 }
 
 // NewScanner creates a new hocr.Scanner
@@ -28,27 +29,49 @@ func NewScanner(r io.Reader) *Scanner {
 	return &Scanner{d: xml.NewDecoder(r)}
 }
 
-// Scan scans the next element in the document.
-// It returns true if a new element could be read.
+// Scan scans the next element in the document.  It returns true if a
+// new element was scanned and false if an error occured or if there
+// is no more nodes to be scanned.
 func (s *Scanner) Scan() bool {
 	var err error
 	var tok xml.Token
 	for tok, err = s.d.Token(); tok != nil && err == nil; tok, err = s.d.Token() {
 		switch t := tok.(type) {
 		case xml.StartElement:
+			s.stack = s.stack.push(t.Name.Local)
+			// /html/head/meta tag
+			if s.stack.match("html", "head", "meta") {
+				node := s.parseMeta(t)
+				if node != nil {
+					s.node = node
+					return true
+				}
+				continue
+			}
+			// an element with class="..."
 			class, _ := findAttr(t.Attr, "class")
 			if isValidClass(class) {
-				s.n = Element{
+				s.node = Element{
 					Class: class,
 					Node:  t.Copy(),
 				}
 				return true
 			}
 		case xml.CharData:
-			if s.hasValidNode() {
-				s.n = Text(t)
+			if s.stack.match("html", "head", "title") {
+				s.node = Title(t)
 				return true
 			}
+			if s.hasValidNode() {
+				str := strings.Trim(string(t), "\n\r\t\v ")
+				if str != "" {
+					s.node = Text(str)
+					return true
+				}
+				continue
+			}
+		case xml.EndElement:
+			s.stack = s.stack.pop()
 		}
 	}
 	return s.handleError(err)
@@ -56,7 +79,7 @@ func (s *Scanner) Scan() bool {
 
 // Node returns the last scanned node.
 func (s *Scanner) Node() Node {
-	return s.n
+	return s.node
 }
 
 // Err returns the last error.
@@ -64,8 +87,17 @@ func (s *Scanner) Err() error {
 	return s.err
 }
 
+func (s *Scanner) parseMeta(elem xml.StartElement) Node {
+	name, ok := findAttr(elem.Attr, "name")
+	if !ok {
+		return nil
+	}
+	content, _ := findAttr(elem.Attr, "content")
+	return Meta{Name: name, Content: content}
+}
+
 func (s *Scanner) hasValidNode() bool {
-	if e, ok := s.n.(Element); ok {
+	if e, ok := s.node.(Element); ok {
 		return isValidClass(e.Class)
 	}
 	return false
@@ -88,11 +120,20 @@ func isValidClass(class string) bool {
 	}
 }
 
-// Node represents hOCR nodes returned by the scanner.
+// Node represents hOCR nodes returned by the scanner.  A Node is
+// either of type Text, Element, Title or Meta.
 type Node interface{}
 
-// Text is just a typedef for a string.
+// Text is used to represent (non empty) char data nodes.
 type Text string
+
+// Title represents the char data nodes of /html/head/title elements.
+type Title string
+
+// Meta represents /html/head/meta tags.
+type Meta struct {
+	Name, Content string
+}
 
 // Element is used to represent text elements in the hOCR document.
 type Element struct {

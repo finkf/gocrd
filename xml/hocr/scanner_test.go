@@ -17,13 +17,6 @@ func withOpenHOCRScanner(path string, f func(*Scanner)) {
 	f(s)
 }
 
-func want(fmt string, got, want interface{}, t *testing.T) {
-	t.Helper()
-	if got != want {
-		t.Fatalf("expected "+fmt+"; got "+fmt, want, got)
-	}
-}
-
 func TestScannerBBox(t *testing.T) {
 	tests := []struct {
 		class string
