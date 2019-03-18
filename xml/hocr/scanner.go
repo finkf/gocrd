@@ -57,6 +57,11 @@ func (s *Scanner) Scan() bool {
 				}
 				return true
 			}
+			// */p element
+			if s.stack.match("p") {
+				s.node = Paragraph{}
+				return true
+			}
 		case xml.CharData:
 			if s.stack.match("html", "head", "title") {
 				s.node = Title(t)
@@ -121,7 +126,7 @@ func isValidClass(class string) bool {
 }
 
 // Node represents hOCR nodes returned by the scanner.  A Node is
-// either of type Text, Element, Title or Meta.
+// either of type Text, Element, Paragraph, Title or Meta.
 type Node interface{}
 
 // Text is used to represent (non empty) char data nodes.
@@ -129,6 +134,9 @@ type Text string
 
 // Title represents the char data nodes of /html/head/title elements.
 type Title string
+
+// Paragraph represents naked <p> tags without any class informations.
+type Paragraph struct{}
 
 // Meta represents /html/head/meta tags.
 type Meta struct {
