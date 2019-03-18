@@ -205,8 +205,8 @@ type Glyph struct {
 // TextStyle specifies font information of any text region.
 type TextStyle struct {
 	FontFamaily  string  `xml:"fontFamily,attr,omitempty"`
-	Serif        bool    `xml:"serif,attr"`
-	Monospace    bool    `xml:"monospace,attr"`
+	Serif        bool    `xml:"serif,attr,omitempty"`
+	Monospace    bool    `xml:"monospace,attr,omitempty"`
 	FontSize     float32 `xml:"fontSize,attr,omitempty"`
 	Kerning      int     `xml:"kerning,attr,omitempty"`
 	TextColor    string  `xml:"textColour,attr,omitempty"`
