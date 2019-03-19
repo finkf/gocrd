@@ -38,6 +38,7 @@ func (s *Scanner) Scan() bool {
 	for tok, err = s.d.Token(); tok != nil && err == nil; tok, err = s.d.Token() {
 		switch t := tok.(type) {
 		case xml.StartElement:
+			s.stack = s.stack.push(t.Name.Local)
 			cont, ret := s.handleStartElement(t)
 			if !cont {
 				return ret
@@ -73,7 +74,6 @@ func (s *Scanner) Err() error {
 }
 
 func (s *Scanner) handleStartElement(t xml.StartElement) (cont, ret bool) {
-	s.stack = s.stack.push(t.Name.Local)
 	// /html/head/meta tag
 	if s.stack.match("html", "head", "meta") {
 		node := s.parseMeta(t)
