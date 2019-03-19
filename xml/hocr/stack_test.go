@@ -18,15 +18,15 @@ func TestStackPushPop(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%v", tc.test), func(t *testing.T) {
-			var stack stack
+			var s stack
 			for _, op := range tc.test {
 				if op == "push" {
-					stack = stack.push(op)
+					s = s.push(op)
 				} else {
-					stack = stack.pop()
+					s = s.pop()
 				}
 			}
-			if got := fmt.Sprintf("%v", stack); got != tc.want {
+			if got := fmt.Sprintf("%v", s); got != tc.want {
 				t.Fatalf("expected %s; got %s", tc.want, got)
 			}
 		})
