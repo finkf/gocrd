@@ -3,6 +3,7 @@ package boundingbox
 import (
 	"image"
 	"strings"
+	"unicode"
 )
 
 type Split struct {
@@ -10,12 +11,39 @@ type Split struct {
 	Cut int
 }
 
-// SplitTokens splits a given rectangle into an list of
-// tokens and their approixmate right cuts.
+// SplitTokens splits a given rectangle into an list of tokens and
+// their approixmate right cuts.  Whitespace between tokens is
+// distributed between the tokens.
 func SplitTokens(rect image.Rectangle, str string) []Split {
-	fields := strings.Fields(str)
-	splits := make([]Split, len(fields))
-	for _, _ = range strings.Fields(str) {
+	if str == "" {
+		return nil
+	}
+	var splits []Split
+	wstr := []rune(str)
+	cuts := Cuts(rect, len(wstr))
+	for b, i := 0, 0; i < len(wstr); i++ {
+		// skip leading whitespace
+		for i < len(wstr) && unicode.IsSpace(wstr[i]) {
+			i++
+		}
+		if i >= len(wstr) {
+			break
+		}
+		// find end of token
+		for i < len(wstr) && !unicode.IsSpace(wstr[i]) {
+			i++
+		}
+		var cut int
+		if i < len(cuts) {
+			cut = cuts[i]
+		} else {
+			cut = cuts[len(cuts)-1]
+		}
+		splits = append(splits, Split{
+			Str: strings.Trim(string(wstr[b:i]), "\t\n\r\v "),
+			Cut: cut,
+		})
+		b = i + 1
 	}
 	return splits
 }
