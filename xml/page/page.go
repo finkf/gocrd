@@ -275,7 +275,7 @@ func (c *Coords) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		pre = " "
 	}
 	selem := xml.StartElement{
-		Name: xml.Name{Local: "Coords"},
+		Name: start.Name,
 		Attr: []xml.Attr{xml.Attr{Name: xml.Name{Local: "points"}, Value: b.String()}},
 	}
 	if err := e.EncodeToken(selem); err != nil {
