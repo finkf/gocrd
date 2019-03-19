@@ -9,7 +9,6 @@ import (
 	"image/draw"
 	"image/png"
 	"io"
-	"log"
 	"os"
 	"sort"
 	"strings"
@@ -73,8 +72,6 @@ func (sp *synpageS) addLine(path string) error {
 	if err != nil {
 		return fmt.Errorf("cannot read text line: %v", err)
 	}
-	log.Printf("rect: %s", rect)
-	log.Printf("text: %s", text)
 	sp.appendLineRegion(text, rect)
 	return nil
 }
@@ -135,7 +132,6 @@ func (sp *synpageS) appendImage(new image.Image) image.Rectangle {
 		rec.Max.X = new.Bounds().Max.X
 	}
 	rec.Max.Y += new.Bounds().Max.Y
-	log.Printf("new image %s", rec)
 	rgba := image.NewRGBA(rec)
 	dest := image.Rectangle{
 		Min: image.Point{
