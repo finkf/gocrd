@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -79,6 +80,7 @@ type ocropyBookToPageXML struct {
 }
 
 func (c *ocropyBookToPageXML) convert(input string) error {
+	log.Printf("converting %s", input)
 	is, err := os.Open(input)
 	if err != nil {
 		return fmt.Errorf("cannot convert %q: %v", input, err)
@@ -182,7 +184,9 @@ func (c *ocropyBookToPageXML) nextPage(old *page.PcGts, e hocr.Element) (*page.P
 	}
 	var imagepath string
 	if _, err := e.Scanf("title", "image", "%s", &imagepath); err != nil {
-		return nil, fmt.Errorf("cannot read image path: %v", err)
+		if _, err := e.Scanf("title", "file", "%s", &imagepath); err != nil {
+			return nil, fmt.Errorf("cannot read image path: %v", err)
+		}
 	}
 	bb := e.BBox()
 	coords := page.Coords{Points: []image.Point{bb.Min, bb.Max}}
@@ -221,6 +225,7 @@ func (c *ocropyBookToPageXML) writePageXML(p *page.PcGts) error {
 	if err := ioutil.WriteFile(opath, xml, filemode); err != nil {
 		return fmt.Errorf("cannot write page xml: %v", err)
 	}
+	log.Printf("wrote page xml file to %s", opath)
 	return nil
 }
 
