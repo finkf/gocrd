@@ -6,6 +6,8 @@ import (
 	"unicode"
 )
 
+// Split represents (trimmed) words with their accoring right
+// position in a rectangle.
 type Split struct {
 	Str string
 	Cut int
