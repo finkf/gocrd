@@ -38,29 +38,9 @@ func (s *Scanner) Scan() bool {
 	for tok, err = s.d.Token(); tok != nil && err == nil; tok, err = s.d.Token() {
 		switch t := tok.(type) {
 		case xml.StartElement:
-			s.stack = s.stack.push(t.Name.Local)
-			// /html/head/meta tag
-			if s.stack.match("html", "head", "meta") {
-				node := s.parseMeta(t)
-				if node != nil {
-					s.node = node
-					return true
-				}
-				continue
-			}
-			// an element with class="..."
-			class, _ := findAttr(t.Attr, "class")
-			if isValidClass(class) {
-				s.node = Element{
-					Class: class,
-					Node:  t.Copy(),
-				}
-				return true
-			}
-			// */p element
-			if s.stack.match("p") {
-				s.node = Paragraph{}
-				return true
+			cont, ret := s.handleStartElement(t)
+			if !cont {
+				return ret
 			}
 		case xml.CharData:
 			if s.stack.match("html", "head", "title") {
@@ -90,6 +70,34 @@ func (s *Scanner) Node() Node {
 // Err returns the last error.
 func (s *Scanner) Err() error {
 	return s.err
+}
+
+func (s *Scanner) handleStartElement(t xml.StartElement) (cont, ret bool) {
+	s.stack = s.stack.push(t.Name.Local)
+	// /html/head/meta tag
+	if s.stack.match("html", "head", "meta") {
+		node := s.parseMeta(t)
+		if node != nil {
+			s.node = node
+			return false, true
+		}
+		return true, false
+	}
+	// an element with class="..."
+	class, _ := findAttr(t.Attr, "class")
+	if isValidClass(class) {
+		s.node = Element{
+			Class: class,
+			Node:  t.Copy(),
+		}
+		return false, true
+	}
+	// */p element
+	if s.stack.match("p") {
+		s.node = Paragraph{}
+		return false, true
+	}
+	return true, false
 }
 
 func (s *Scanner) parseMeta(elem xml.StartElement) Node {
