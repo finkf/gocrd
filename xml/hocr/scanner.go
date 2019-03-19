@@ -44,17 +44,9 @@ func (s *Scanner) Scan() bool {
 				return ret
 			}
 		case xml.CharData:
-			if s.stack.match("html", "head", "title") {
-				s.node = Title(t)
-				return true
-			}
-			if s.hasValidNode() {
-				str := strings.Trim(string(t), "\n\r\t\v ")
-				if str != "" {
-					s.node = Text(str)
-					return true
-				}
-				continue
+			cont, ret := s.handleCharData(t)
+			if !cont {
+				return ret
 			}
 		case xml.EndElement:
 			s.stack = s.stack.pop()
@@ -91,6 +83,21 @@ func (s *Scanner) handleStartElement(t xml.StartElement) (cont, ret bool) {
 			Node:  t.Copy(),
 		}
 		return false, true
+	}
+	return true, false
+}
+
+func (s *Scanner) handleCharData(t []byte) (cont, ret bool) {
+	if s.stack.match("html", "head", "title") {
+		s.node = Title(t)
+		return false, true
+	}
+	if s.hasValidNode() {
+		str := strings.Trim(string(t), "\n\r\t\v ")
+		if str != "" {
+			s.node = Text(str)
+			return false, true
+		}
 	}
 	return true, false
 }
