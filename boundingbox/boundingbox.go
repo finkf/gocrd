@@ -1,7 +1,6 @@
 package boundingbox
 
 import (
-	"fmt"
 	"image"
 	"strings"
 )
@@ -22,12 +21,8 @@ func SplitTokens(rect image.Rectangle, str string) []Split {
 }
 
 // Cuts returns an array of evenly spaced right positions for n
-// characters within the given rectangle.  If n is larger then the
-// rectangle's width, this function panics.
+// positions within the given rectangle.  N must be larger than 0.
 func Cuts(rect image.Rectangle, n int) []int {
-	if n > rect.Dx() {
-		panic(fmt.Sprintf("cannot calculate %d cuts for rectangle of width %d", n, rect.Dx()))
-	}
 	w := rect.Dx() / n // width for each cut
 	r := rect.Dx() % n // rest to distribute
 	b := rect.Min.X    // left position
@@ -35,7 +30,7 @@ func Cuts(rect image.Rectangle, n int) []int {
 	for i := 0; i < n; i++ {
 		cuts[i] = b + w
 		if r > 0 {
-			cuts[i] += 1
+			cuts[i]++
 			r--
 		}
 		b = cuts[i]

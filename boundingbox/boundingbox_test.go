@@ -13,6 +13,8 @@ func TestCuts(t *testing.T) {
 		test image.Rectangle
 		n    int
 	}{
+		{[]int{1, 1, 1}, image.Rect(0, 0, 1, 0), 3},
+		{[]int{1, 2, 2}, image.Rect(0, 0, 2, 0), 3},
 		{[]int{1, 2, 3}, image.Rect(0, 0, 3, 0), 3},
 		{[]int{2, 3, 4}, image.Rect(0, 0, 4, 0), 3},
 		{[]int{2, 4, 5}, image.Rect(0, 0, 5, 0), 3},
