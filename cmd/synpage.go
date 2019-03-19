@@ -111,7 +111,7 @@ func (sp *synpages) writePageXML() (eout error) {
 	if err != nil {
 		return fmt.Errorf("cannot write pageXML: %v", err)
 	}
-	defer func() { eout = checkClose(eout, out.Close()) }()
+	defer func() { eout = checkClose(eout, out) }()
 	if err := xml.NewEncoder(out).Encode(sp.page); err != nil {
 		return fmt.Errorf("cannot write pageXML: %v", err)
 	}
@@ -124,14 +124,15 @@ func (sp *synpages) writeImage() (eout error) {
 	if err != nil {
 		return fmt.Errorf("cannot write image: %v", err)
 	}
-	defer func() { eout = checkClose(eout, out.Close()) }()
+	defer func() { eout = checkClose(eout, out) }()
 	if err := png.Encode(out, sp.img); err != nil {
 		return fmt.Errorf("cannot write image: %v", err)
 	}
 	return nil
 }
 
-func checkClose(e1, e2 error) error {
+func checkClose(e1 error, c io.Closer) error {
+	e2 := c.Close()
 	if e1 != nil {
 		return e1
 	}
