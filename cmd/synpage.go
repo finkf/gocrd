@@ -80,7 +80,9 @@ func (sp *synpageS) addLine(p string) error {
 func (sp *synpageS) appendLineRegion(path, text string, rect image.Rectangle) {
 	if len(sp.page.Page.TextRegion) == 0 {
 		sp.page.Page.TextRegion = append(sp.page.Page.TextRegion, page.TextRegion{
-			TextRegionBase: page.TextRegionBase{ID: "r_1"},
+			TextRegionBase: page.TextRegionBase{
+				ID: "r_1",
+			},
 		})
 	}
 	lineID := len(sp.page.Page.TextRegion[0].TextLine) + 1
@@ -102,6 +104,7 @@ func (sp *synpageS) appendLineRegion(path, text string, rect image.Rectangle) {
 				ID:        fmt.Sprintf("%s_w_%d", line.ID, i+1),
 				Coords:    page.Coords{Points: []image.Point{{cut, y0}, {split.Cut, y1}}},
 				TextEquiv: page.TextEquiv{Unicode: []string{split.Str}},
+				Custom:    fmt.Sprintf("origin: {file:%s}", path),
 			},
 		}
 		cut = split.Cut
