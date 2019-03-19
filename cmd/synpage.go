@@ -92,8 +92,9 @@ func (sp *synpageS) appendImage(new image.Image) image.Rectangle {
 			Y: old.Bounds().Max.Y + new.Bounds().Max.Y,
 		},
 	}
-	draw.Draw(rgba, old.Bounds(), old, image.Point{0, 0}, draw.Src)
-	draw.Draw(rgba, dest, new, image.Point{0, 0}, draw.Src)
+	draw.Draw(rgba, rgba.Bounds(), &image.Uniform{color.White}, image.ZP, draw.Src)
+	draw.Draw(rgba, old.Bounds(), old, image.ZP, draw.Src)
+	draw.Draw(rgba, dest, new, image.ZP, draw.Src)
 	sp.img = rgba
 	return dest
 }
