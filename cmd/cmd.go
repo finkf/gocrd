@@ -22,6 +22,7 @@ func init() {
 	rootCMD.AddCommand(catCommand)
 	rootCMD.AddCommand(convertCommand)
 	rootCMD.AddCommand(replaceCommand)
+	rootCMD.AddCommand(synpageCommand)
 }
 
 func must(err error) {
