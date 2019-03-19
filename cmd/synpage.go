@@ -34,9 +34,9 @@ var (
 )
 
 func init() {
-	catCommand.Flags().StringVarP(
+	synpageCommand.Flags().StringVarP(
 		&synpageOutput, "out", "o", synpageOutput, "base name for output files")
-	catCommand.Flags().BoolVarP(
+	synpageCommand.Flags().BoolVarP(
 		&synpageSort, "sort", "s", synpageSort, "sort input files")
 }
 
