@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"io"
 	"os"
+	"path"
 	"sort"
 	"strings"
 	"time"
@@ -62,21 +63,21 @@ type synpageS struct {
 	img  image.Image
 }
 
-func (sp *synpageS) addLine(path string) error {
-	img, err := openLineImage(path)
+func (sp *synpageS) addLine(p string) error {
+	img, err := openLineImage(p)
 	if err != nil {
 		return fmt.Errorf("cannot open line image: %v", err)
 	}
 	rect := sp.appendImage(img)
-	text, err := sp.readLine(path)
+	text, err := sp.readLine(p)
 	if err != nil {
 		return fmt.Errorf("cannot read text line: %v", err)
 	}
-	sp.appendLineRegion(text, rect)
+	sp.appendLineRegion(path.Base(p), text, rect)
 	return nil
 }
 
-func (sp *synpageS) appendLineRegion(text string, rect image.Rectangle) {
+func (sp *synpageS) appendLineRegion(path, text string, rect image.Rectangle) {
 	if len(sp.page.Page.TextRegion) == 0 {
 		sp.page.Page.TextRegion = append(sp.page.Page.TextRegion, page.TextRegion{
 			TextRegionBase: page.TextRegionBase{ID: "r_1"},
@@ -88,6 +89,7 @@ func (sp *synpageS) appendLineRegion(text string, rect image.Rectangle) {
 			ID:        fmt.Sprintf("r_1_l_%d", lineID),
 			Coords:    page.Coords{Points: []image.Point{rect.Min, rect.Max}},
 			TextEquiv: page.TextEquiv{Unicode: []string{text}},
+			Custom:    fmt.Sprintf("origin: {file:%s}", path),
 		},
 		BaseLine: page.Coords{Points: baseline(rect)},
 	}
