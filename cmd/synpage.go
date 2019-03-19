@@ -45,7 +45,7 @@ func synpage(args []string, stdout io.Writer) error {
 	if synpageSort {
 		sort.Strings(args)
 	}
-	var sp synpages
+	var sp synpageS
 	for _, arg := range args {
 		if err := sp.addLine(arg); err != nil {
 			return err
@@ -54,12 +54,12 @@ func synpage(args []string, stdout io.Writer) error {
 	return sp.write()
 }
 
-type synpages struct {
+type synpageS struct {
 	page page.PcGts
 	img  image.Image
 }
 
-func (sp *synpages) addLine(path string) error {
+func (sp *synpageS) addLine(path string) error {
 	img, err := openLineImage(path)
 	if err != nil {
 		return fmt.Errorf("cannot open line image: %v", err)
@@ -69,7 +69,7 @@ func (sp *synpages) addLine(path string) error {
 	return nil
 }
 
-func (sp *synpages) appendImage(new image.Image) image.Rectangle {
+func (sp *synpageS) appendImage(new image.Image) image.Rectangle {
 	if sp.img == nil {
 		sp.img = new
 		return sp.img.Bounds()
@@ -98,14 +98,14 @@ func (sp *synpages) appendImage(new image.Image) image.Rectangle {
 	return dest
 }
 
-func (sp *synpages) write() error {
+func (sp *synpageS) write() error {
 	if err := sp.writePageXML(); err != nil {
 		return err
 	}
 	return sp.writeImage()
 }
 
-func (sp *synpages) writePageXML() (eout error) {
+func (sp *synpageS) writePageXML() (eout error) {
 	sp.page.Metadata = make(page.Metadata)
 	out, err := os.Create(synpageOutput + ".xml")
 	if err != nil {
@@ -118,7 +118,7 @@ func (sp *synpages) writePageXML() (eout error) {
 	return nil
 }
 
-func (sp *synpages) writeImage() (eout error) {
+func (sp *synpageS) writeImage() (eout error) {
 	// write image
 	out, err := os.Create(synpageOutput + ".png")
 	if err != nil {
