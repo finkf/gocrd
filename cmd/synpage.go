@@ -213,20 +213,12 @@ func (sp *synpageS) writeImage() (eout error) {
 	return nil
 }
 
-func checkClose(e1 error, c io.Closer) error {
-	e2 := c.Close()
-	if e1 != nil {
-		return e1
-	}
-	return e2
-}
-
 func openLineImage(path string) (image.Image, error) {
 	imgpath := path
 	if pos := strings.Index(path, "."); pos != -1 {
 		imgpath = path[0:pos]
 	}
-	for _, ext := range []string{".bin.png", ".dew.png", ".png"} {
+	for _, ext := range []string{".bin.png", ".dew.png", ".nrm.png", ".png"} {
 		if _, err := os.Stat(imgpath + ext); err == nil {
 			is, err := os.Open(imgpath + ext)
 			if err != nil {

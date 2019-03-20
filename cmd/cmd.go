@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -30,6 +31,15 @@ func must(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// checkClose helps to defer close calls with error checking.
+func checkClose(err error, c io.Closer) error {
+	errClose := c.Close()
+	if err != nil {
+		return err
+	}
+	return errClose
 }
 
 // Execute is the main entry point for the gocrd commands.
