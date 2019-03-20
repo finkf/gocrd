@@ -23,6 +23,7 @@ func init() {
 	rootCMD.AddCommand(convertCommand)
 	rootCMD.AddCommand(replaceCommand)
 	rootCMD.AddCommand(synpageCommand)
+	rootCMD.AddCommand(markCommand)
 }
 
 func must(err error) {
