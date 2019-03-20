@@ -191,6 +191,12 @@ func (e Element) Scanf(attr, key, format string, args ...interface{}) bool {
 	return err == nil
 }
 
+// Attribute returns the attribute's value for a given key and if the
+// attribute was found.
+func (e Element) Attribute(key string) (string, bool) {
+	return findAttr(e.Node.Attr, key)
+}
+
 func findAttr(attrs []xml.Attr, name string) (string, bool) {
 	for _, attr := range attrs {
 		if attr.Name.Local == name {
