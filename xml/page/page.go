@@ -174,7 +174,7 @@ type TextRegionBase struct {
 	Custom    string `xml:"custom,attr"`
 	Coords    Coords
 	TextStyle TextStyle
-	TextEquiv TextEquiv
+	TextEquiv TextEquiv // TODO: multiple TextEquivs are allowed
 }
 
 // TextRegion is a region of text (paragraph, block, ...)
@@ -218,6 +218,10 @@ type TextStyle struct {
 type TextEquiv struct {
 	PlainText []string
 	Unicode   []string
+	DT        string  `xml:"dataType,attr,omitempty"`
+	DTD       string  `xml:"dataTypeDetails,attr,omitempty"`
+	Index     int     `xml:"index,attr,omitempty"`
+	Conf      float64 `xml:"conf,attr,omitempty"`
 }
 
 // Coords are rectangles of points.
