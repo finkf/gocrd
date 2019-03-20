@@ -148,7 +148,7 @@ func readOCRLines(path string) ([]ocrline, error) {
 			needText = false
 			continue
 		}
-		lines = append(lines, ocrline{bb: element.BBox()})
+		lines = append(lines, ocrline{bb: element.BoundingBox()})
 		needText = true
 	}
 	return lines, s.Err()
