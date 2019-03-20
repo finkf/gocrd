@@ -161,9 +161,9 @@ type Element struct {
 // (0,0)-(0,0) is returned.
 func (e Element) BoundingBox() image.Rectangle {
 	var r image.Rectangle
-	_, err := e.Scanf("title", "bbox", "%d %d %d %d",
+	ok := e.Scanf("title", "bbox", "%d %d %d %d",
 		&r.Min.X, &r.Min.Y, &r.Max.X, &r.Max.Y)
-	if err != nil {
+	if !ok {
 		return image.Rectangle{}
 	}
 	return r
@@ -171,14 +171,14 @@ func (e Element) BoundingBox() image.Rectangle {
 
 // Scanf is used to read values of the different element attributes.
 // Use like this: e.Scanf("title", "image", "%s", &str)
-func (e Element) Scanf(attr, key, format string, args ...interface{}) (int, error) {
+func (e Element) Scanf(attr, key, format string, args ...interface{}) bool {
 	val, found := findAttr(e.Node.Attr, attr)
 	if !found {
-		return 0, fmt.Errorf("cannot find attribute: %s", attr)
+		return false
 	}
 	var spos, epos int
 	if spos = strings.Index(val, key); spos == -1 {
-		return 0, fmt.Errorf("cannot find key: %s", key)
+		return false
 	}
 	spos += len(key) + 1
 	epos = strings.Index(val[spos:], ";")
@@ -187,7 +187,8 @@ func (e Element) Scanf(attr, key, format string, args ...interface{}) (int, erro
 	} else {
 		epos += spos
 	}
-	return fmt.Sscanf(val[spos:epos], format, args...)
+	_, err := fmt.Sscanf(val[spos:epos], format, args...)
+	return err == nil
 }
 
 func findAttr(attrs []xml.Attr, name string) (string, bool) {
