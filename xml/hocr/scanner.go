@@ -1,6 +1,7 @@
 package hocr // import "github.com/finkf/gocrd/xml/hocr"
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"image"
@@ -89,7 +90,7 @@ func (s *Scanner) handleStartElement(t xml.StartElement) (cont, ret bool) {
 
 func (s *Scanner) handleCharData(t []byte) (cont, ret bool) {
 	if s.stack.match("html", "head", "title") {
-		s.node = Title(t)
+		s.node = Title(bytes.Trim(t, "\t\n\r\v "))
 		return false, true
 	}
 	if s.hasValidNode() {
