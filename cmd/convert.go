@@ -216,16 +216,17 @@ func (c *ocropyBookToPageXML) nextPage(old *page.PcGts, e hocr.Element) (*page.P
 }
 
 func (c *ocropyBookToPageXML) writePageXML(p *page.PcGts) error {
-	const filemode = os.FileMode(0666)
 	opath := path.Join(c.odir, stripPathExtension(path.Base(p.Page.ImageFilename))+".xml")
-	xml, err := xml.MarshalIndent(p, "\t", "\t")
+	out, err := os.Open(opath)
 	if err != nil {
 		return fmt.Errorf("cannot write page xml: %v", err)
 	}
-	if err := ioutil.WriteFile(opath, xml, filemode); err != nil {
+	defer out.Close()
+	e := xml.NewEncoder(out)
+	e.Indent("\t", "\t")
+	if err := e.Encode(p); err != nil {
 		return fmt.Errorf("cannot write page xml: %v", err)
 	}
-	log.Printf("wrote page xml file to %s", opath)
 	return nil
 }
 

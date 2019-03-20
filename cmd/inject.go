@@ -70,7 +70,9 @@ func runReplace(cmd *cobra.Command, args []string) error {
 		},
 	}
 	p.Page.TextRegion = append(p.Page.TextRegion, r)
-	return xml.NewEncoder(os.Stdout).Encode(p)
+	e := xml.NewEncoder(os.Stdout)
+	e.Indent("\t", "\t")
+	return e.Encode(p)
 }
 
 func textRegionString(ocrlines []ocrline) string {
