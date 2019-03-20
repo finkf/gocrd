@@ -88,7 +88,7 @@ func TestScannerBBox(t *testing.T) {
 					if e, ok := s.Node().(Element); !ok || e.Class != tc.class {
 						continue
 					}
-					bb := s.Node().(Element).BBox()
+					bb := s.Node().(Element).BoundingBox()
 					if bb == tc.want {
 						return
 					}

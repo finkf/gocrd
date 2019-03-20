@@ -156,10 +156,10 @@ type Element struct {
 	Node  xml.StartElement
 }
 
-// BBox returns the bounding box of the element.
-// If the element does not have a bounding box,
-// the empty boundingbox (0,0)-(0,0) is returned.
-func (e Element) BBox() image.Rectangle {
+// BoundingBox returns the bounding box of the element.  If the
+// element does not have a bounding box, the empty boundingbox
+// (0,0)-(0,0) is returned.
+func (e Element) BoundingBox() image.Rectangle {
 	var r image.Rectangle
 	_, err := e.Scanf("title", "bbox", "%d %d %d %d",
 		&r.Min.X, &r.Min.Y, &r.Max.X, &r.Max.Y)
