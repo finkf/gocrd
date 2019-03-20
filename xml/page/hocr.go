@@ -65,6 +65,7 @@ func addHOCRRegion(p *PcGts, elem hocr.Element) {
 	case hocr.ClassLine:
 		handleHOCRLine(p, elem)
 	case hocr.ClassWord:
+		handleHOCRWord(p, elem)
 	}
 }
 
@@ -134,7 +135,7 @@ func addHOCRText(p *PcGts, elem hocr.Element, text string) {
 		return
 	}
 	// add text (if the previous element was a line or word)
-	i := len(p.Page.TextRegion) - 1 // if
+	i := len(p.Page.TextRegion) - 1
 	switch elem.Class {
 	case hocr.ClassLine:
 		j := len(p.Page.TextRegion[i].TextLine) - 1
