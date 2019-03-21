@@ -3,6 +3,7 @@ package boundingbox
 import (
 	"fmt"
 	"image"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -19,6 +20,25 @@ func TestToPoints(t *testing.T) {
 		t.Run(fmt.Sprintf("%s", tc.test), func(t *testing.T) {
 			if got := ToPoints(tc.test); !reflect.DeepEqual(got, tc.want) {
 				t.Fatalf("expected %v; got %v", tc.want, got)
+			}
+		})
+	}
+}
+
+func TestFromPoints(t *testing.T) {
+	tests := []struct {
+		test []image.Point
+		want image.Rectangle
+	}{
+		{nil, image.Rect(0, 0, math.MaxInt64, math.MaxInt64)},
+		{[]image.Point{{1, 1}}, image.Rect(1, 1, 1, 1)},
+		{[]image.Point{{1, 1}, {2, 2}}, image.Rect(1, 1, 2, 2)},
+		{[]image.Point{{1, 1}, {2, 2}, {3, 3}}, image.Rect(1, 1, 3, 3)},
+	}
+	for _, tc := range tests {
+		t.Run(fmt.Sprintf("%v", tc.test), func(t *testing.T) {
+			if got := FromPoints(tc.test); got != tc.want {
+				t.Fatalf("expected %s; got %s", tc.want, got)
 			}
 		})
 	}

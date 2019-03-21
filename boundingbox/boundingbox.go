@@ -2,6 +2,7 @@ package boundingbox
 
 import (
 	"image"
+	"math"
 	"strings"
 	"unicode"
 )
@@ -18,6 +19,29 @@ type Split struct {
 // (rectangle.Max).
 func ToPoints(rect image.Rectangle) []image.Point {
 	return []image.Point{rect.Min, rect.Max}
+}
+
+// FromPoints converts the given points array to a rectangle.
+func FromPoints(points []image.Point) image.Rectangle {
+	minx := math.MaxInt64
+	maxx := 0
+	miny := math.MaxInt64
+	maxy := 0
+	for _, p := range points {
+		if p.X < minx {
+			minx = p.X
+		}
+		if p.Y < miny {
+			miny = p.Y
+		}
+		if p.X > maxx {
+			maxx = p.X
+		}
+		if p.Y > maxy {
+			maxy = p.Y
+		}
+	}
+	return image.Rect(int(minx), int(miny), int(maxx), int(maxy))
 }
 
 // SplitTokens splits a given rectangle into an list of tokens and

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"math"
 	"os"
 	"strings"
 	"time"
@@ -227,29 +226,6 @@ type TextEquiv struct {
 // Coords are rectangles of points.
 type Coords struct {
 	Points []image.Point `xml:"points,attr"`
-}
-
-// BoundingBox returns the bounding box of the polygon.
-func (c Coords) BoundingBox() image.Rectangle {
-	minx := math.MaxInt64
-	maxx := math.MinInt64
-	miny := math.MaxInt64
-	maxy := math.MinInt64
-	for _, p := range c.Points {
-		if p.X < minx {
-			minx = p.X
-		}
-		if p.Y < miny {
-			miny = p.Y
-		}
-		if p.X > maxx {
-			maxx = p.X
-		}
-		if p.Y > maxy {
-			maxy = p.Y
-		}
-	}
-	return image.Rect(int(minx), int(miny), int(maxx), int(maxy))
 }
 
 // UnmarshalXML unmarshals a Coords instance.

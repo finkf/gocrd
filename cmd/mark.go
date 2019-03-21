@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/finkf/gocrd/boundingbox"
 	"github.com/finkf/gocrd/xml/page"
 	"github.com/spf13/cobra"
 	"golang.org/x/image/tiff"
@@ -62,21 +63,21 @@ func markRegions(p *page.PcGts, img draw.Image) error {
 	mg := strings.ToLower(markLevel) == "glyph"
 	for _, r := range p.Page.TextRegion {
 		if mr {
-			drawRectangle(r.Coords.BoundingBox(), img)
+			drawRectangle(boundingbox.FromPoints(r.Coords.Points), img)
 			continue
 		}
 		for _, l := range r.TextLine {
 			if ml {
-				drawRectangle(l.Coords.BoundingBox(), img)
+				drawRectangle(boundingbox.FromPoints(l.Coords.Points), img)
 			}
 			for _, w := range l.Word {
 				if mw {
-					drawRectangle(w.Coords.BoundingBox(), img)
+					drawRectangle(boundingbox.FromPoints(w.Coords.Points), img)
 					continue
 				}
 				for _, g := range w.Glyph {
 					if mg {
-						drawRectangle(g.Coords.BoundingBox(), img)
+						drawRectangle(boundingbox.FromPoints(g.Coords.Points), img)
 					}
 				}
 			}

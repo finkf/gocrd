@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/finkf/gocrd/boundingbox"
 	"github.com/finkf/gocrd/xml/hocr"
 )
 
@@ -109,7 +110,7 @@ func handleHOCRLine(p *PcGts, elem hocr.Element) {
 	var arctan float64
 	var yaxis int
 	if elem.Scanf("title", "baseline", "%f %d", &arctan, yaxis) {
-		line.BaseLine.Points = hOCRBaseLine(line.Coords.BoundingBox(), arctan, yaxis)
+		line.BaseLine.Points = hOCRBaseLine(boundingbox.FromPoints(line.Coords.Points), arctan, yaxis)
 	}
 	p.Page.TextRegion[i].TextLine = append(p.Page.TextRegion[i].TextLine, line)
 }
