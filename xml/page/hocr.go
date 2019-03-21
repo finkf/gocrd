@@ -7,6 +7,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/finkf/gocrd/xml/hocr"
@@ -53,7 +54,11 @@ func ReadFromHOCR(in io.Reader) (*PcGts, error) {
 			p.Metadata[t.Name] = t.Content
 		}
 	}
-	return p, s.Err()
+	if s.Err() != nil {
+		return nil, s.Err()
+	}
+	hOCRUpateTextEquivs(p)
+	return p, nil
 }
 
 func addHOCRRegion(p *PcGts, elem hocr.Element) {
@@ -144,6 +149,29 @@ func addHOCRText(p *PcGts, elem hocr.Element, text string) {
 		j := len(p.Page.TextRegion[i].TextLine) - 1
 		k := len(p.Page.TextRegion[i].TextLine[j].Word) - 1
 		p.Page.TextRegion[i].TextLine[j].Word[k].TextEquiv = te
+	}
+}
+
+func hOCRUpateTextEquivs(p *PcGts) {
+	for i := range p.Page.TextRegion {
+		lines := make([]string, len(p.Page.TextRegion[i].TextLine))
+		for j := range p.Page.TextRegion[i].TextLine {
+			if len(p.Page.TextRegion[i].TextLine[j].TextEquiv.Unicode) == 0 {
+				words := make([]string, len(p.Page.TextRegion[i].TextLine[j].Word))
+				for k, word := range p.Page.TextRegion[i].TextLine[j].Word {
+					if len(word.TextEquiv.Unicode) > 0 {
+						words[k] = word.TextEquiv.Unicode[0]
+					}
+				}
+				p.Page.TextRegion[i].TextLine[j].TextEquiv.Unicode =
+					[]string{strings.Join(words, " ")}
+			}
+			lines[j] = p.Page.TextRegion[i].TextLine[j].TextEquiv.Unicode[0]
+		}
+		if len(p.Page.TextRegion[i].TextEquiv.Unicode) == 0 {
+			p.Page.TextRegion[i].TextEquiv.Unicode =
+				[]string{strings.Join(lines, "\n")}
+		}
 	}
 }
 
