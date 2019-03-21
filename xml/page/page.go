@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/finkf/gocrd/boundingbox"
 )
 
 // XML namespace, schema instance and location.
@@ -188,6 +190,31 @@ type TextLine struct {
 	TextRegionBase
 	BaseLine Coords `xml:"Baseline"`
 	Word     []Word
+}
+
+// UpdateWords updates the words of this text line using the given
+// string (should be most likely TextEquiv.Unicode[0]).  Any existing
+// words are discared.  The bounding boxes are approximatly calculated
+// based on the number of (unicode) characters of the different words.
+func (tl *TextLine) UpdateWords(str string) {
+	wordIDFormat := tl.ID + "_word_%d"
+	bb := boundingbox.FromPoints(tl.Coords.Points)
+	tokens := boundingbox.SplitTokens(bb, str)
+	tl.Word = make([]Word, len(tokens))
+
+	prevCut := bb.Min.X
+	for i, token := range tokens {
+		tl.Word[i] = Word{
+			TextRegionBase: TextRegionBase{
+				ID:        fmt.Sprintf(wordIDFormat, i+1),
+				TextEquiv: TextEquiv{Unicode: []string{token.Str}},
+				Coords: Coords{
+					Points: boundingbox.ToPoints(
+						image.Rect(prevCut, bb.Min.Y, token.Cut, bb.Max.Y)),
+				},
+			},
+		}
+	}
 }
 
 // Word is a token in a line.
