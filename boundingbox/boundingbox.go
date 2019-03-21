@@ -13,6 +13,13 @@ type Split struct {
 	Cut int
 }
 
+// ToPoints converts a rectangle to an array of two points, consisting
+// of the top left point (rectangle.Min) and the bottom right point
+// (rectangle.Max).
+func ToPoints(rect image.Rectangle) []image.Point {
+	return []image.Point{rect.Min, rect.Max}
+}
+
 // SplitTokens splits a given rectangle into an list of tokens and
 // their approixmate right cuts.  Whitespace between tokens is
 // distributed between the tokens.

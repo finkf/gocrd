@@ -7,6 +7,23 @@ import (
 	"testing"
 )
 
+func TestToPoints(t *testing.T) {
+	tests := []struct {
+		test image.Rectangle
+		want []image.Point
+	}{
+		{image.Rect(1, 1, 2, 2), []image.Point{{1, 1}, {2, 2}}},
+		{image.Rect(0, 0, 0, 0), []image.Point{{0, 0}, {0, 0}}},
+	}
+	for _, tc := range tests {
+		t.Run(fmt.Sprintf("%s", tc.test), func(t *testing.T) {
+			if got := ToPoints(tc.test); !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("expected %v; got %v", tc.want, got)
+			}
+		})
+	}
+}
+
 func TestCuts(t *testing.T) {
 	tests := []struct {
 		want []int
