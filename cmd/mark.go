@@ -14,12 +14,15 @@ import (
 )
 
 var markCommand = &cobra.Command{
-	Use:   "mark pagexml-file image-file",
+	Use:   "mark pagexml image output",
 	Short: "mark text regions in an image",
-	RunE:  runMark,
-	Args:  cobra.ExactArgs(3),
+	Long: `Given a PageXML file and an image file
+mark the bounding boxes of the regions in the image.
+The resulting file is written to the output file.`,
+	RunE: runMark,
+	Args: cobra.ExactArgs(3),
 }
-var markLevel = "line"
+var markLevel = levelLine
 
 func init() {
 	markCommand.Flags().StringVarP(
@@ -57,10 +60,10 @@ func mark(pagexml, image, outpath string) error {
 }
 
 func markRegions(p *page.PcGts, img draw.Image) error {
-	mr := strings.ToLower(markLevel) == "region"
-	ml := strings.ToLower(markLevel) == "line"
-	mw := strings.ToLower(markLevel) == "word"
-	mg := strings.ToLower(markLevel) == "glyph"
+	mr := strings.ToLower(markLevel) == levelRegion
+	ml := strings.ToLower(markLevel) == levelLine
+	mw := strings.ToLower(markLevel) == levelWord
+	mg := strings.ToLower(markLevel) == levelGlyph
 	for _, r := range p.Page.TextRegion {
 		if mr {
 			drawRectangle(boundingbox.FromPoints(r.Coords.Points), img)

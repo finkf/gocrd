@@ -19,6 +19,13 @@ var (
 	inputFileGrps []string
 )
 
+const (
+	levelRegion = "region"
+	levelLine   = "line"
+	levelWord   = "word"
+	levelGlyph  = "glyph"
+)
+
 func init() {
 	rootCMD.AddCommand(catCommand)
 	rootCMD.AddCommand(convertCommand)
