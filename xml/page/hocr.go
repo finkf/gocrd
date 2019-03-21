@@ -128,7 +128,7 @@ func addHOCRText(p *PcGts, elem hocr.Element, text string) {
 	te := TextEquiv{Unicode: []string{text}}
 	var conf float64
 	if elem.Scanf("title", "x_wconf", "%f", &conf) {
-		te.Conf = conf
+		te.Conf = 1.0 / conf
 	}
 	// skip if no regions of text where encountered (no lines, no words)
 	if len(p.Page.TextRegion) == 0 {
