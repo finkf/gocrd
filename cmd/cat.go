@@ -22,7 +22,7 @@ const catDefaultFormat = "%R:"
 
 var (
 	catFormat             = catDefaultFormat
-	catLevel              string
+	catLevel              = levelLine
 	catPrefix             bool
 	catFormatFileID       string
 	catFormatInputFileGrp string
@@ -36,7 +36,7 @@ func init() {
 	catCommand.Flags().StringArrayVarP(
 		&inputFileGrps, "input-file-grp", "I", nil, "input file groups")
 	catCommand.Flags().StringVarP(
-		&catLevel, "level", "l", "line", "set level of output regions [region|line|word]")
+		&catLevel, "level", "l", catLevel, "set level of output regions [region|line|word]")
 	catCommand.Flags().BoolVarP(
 		&catPrefix, "prefix", "p", false, "ouput default prefix")
 	catCommand.Flags().StringVarP(
@@ -105,8 +105,8 @@ func cat(is io.Reader, stdout io.Writer) error {
 
 func catPage(p page.Page, stdout io.Writer) error {
 	// cat level is either region, word or glyph
-	pregion := strings.ToLower(catLevel) == "region"
-	pline := strings.ToLower(catLevel) == "line"
+	pregion := strings.ToLower(catLevel) == levelRegion
+	pline := strings.ToLower(catLevel) == levelLine
 
 	for _, region := range p.TextRegion {
 		if pregion {
@@ -187,7 +187,7 @@ func regionString(t page.TextEquiv) string {
 
 func levelOK() bool {
 	switch strings.ToLower(catLevel) {
-	case "line", "region", "word":
+	case levelLine, levelRegion, levelWord:
 		return true
 	default:
 		return false
