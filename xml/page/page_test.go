@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image"
 	"testing"
+
+	"github.com/finkf/gocrd/boundingbox"
 )
 
 const testfile = "testdata/kant_aufklaerung_1784_0020.xml"
@@ -66,7 +68,7 @@ func TestBoundingBox(t *testing.T) {
 		}
 		for _, tc := range tests {
 			t.Run(fmt.Sprintf("%s", tc.want), func(t *testing.T) {
-				want("%s", tc.test.BoundingBox(), tc.want, t)
+				want("%s", boundingbox.FromPoints(tc.test.Points), tc.want, t)
 			})
 		}
 	})
