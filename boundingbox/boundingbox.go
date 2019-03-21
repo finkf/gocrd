@@ -7,13 +7,6 @@ import (
 	"unicode"
 )
 
-// Split represents (trimmed) words with their accoring right
-// position in a rectangle.
-type Split struct {
-	Str string
-	Cut int
-}
-
 // ToPoints converts a rectangle to an array of two points, consisting
 // of the top left point (rectangle.Min) and the bottom right point
 // (rectangle.Max).
@@ -42,6 +35,13 @@ func FromPoints(points []image.Point) image.Rectangle {
 		}
 	}
 	return image.Rect(int(minx), int(miny), int(maxx), int(maxy))
+}
+
+// Split represents (trimmed) words with their accoring right
+// position in a rectangle.
+type Split struct {
+	Str string
+	Cut int
 }
 
 // SplitTokens splits a given rectangle into an list of tokens and
