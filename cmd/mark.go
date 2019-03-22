@@ -17,8 +17,8 @@ var markCommand = &cobra.Command{
 	Use:   "mark pagexml image output",
 	Short: "mark text regions in an image",
 	Long: `Given a PageXML file and an image file
-mark the bounding boxes of the regions in the image.
-The resulting file is written to the output file.`,
+mark the bounding boxes of the regions in the image
+and write the image to the output file.`,
 	RunE: runMark,
 	Args: cobra.ExactArgs(3),
 }
