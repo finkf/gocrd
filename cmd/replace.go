@@ -73,7 +73,7 @@ func replacePage(p *page.PcGts, replaceLines []string) error {
 		case lev.Sub:
 			substituteLine(p, replaceLines[i], pageLineIndices[j])
 		case lev.Del:
-			// do nothing
+			deleteLine(p, pageLineIndices[i])
 		case lev.Ins:
 			deleteLine(p, pageLineIndices[j])
 		}
