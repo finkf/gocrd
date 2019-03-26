@@ -23,7 +23,7 @@ const (
 // PcGtsXMLHeader defines the default xml namespace header.
 var PcGtsXMLHeader = []xml.Attr{
 	xml.Attr{
-		Name:  xml.Name{Local: "xmlns"},
+		// Name:  xml.Name{Space: "xmlns"},
 		Value: XMLNameSpace,
 	},
 	xml.Attr{

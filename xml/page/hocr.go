@@ -33,7 +33,7 @@ func OpenFromHOCR(file string) (*PcGts, error) {
 // PageXML structure.  This method assumes one page per hOCR document.
 func ReadFromHOCR(in io.Reader) (*PcGts, error) {
 	p := &PcGts{
-		Attributes: PcGtsXMLHeader,
+		// Attributes: PcGtsXMLHeader,
 		Metadata: Metadata{
 			"Created":     time.Now().Format(time.RFC3339),
 			"LastChanged": time.Now().Format(time.RFC3339),
