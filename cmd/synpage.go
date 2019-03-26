@@ -11,8 +11,8 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/finkf/gocrd/boundingbox"
@@ -215,8 +215,8 @@ func (sp *synpageS) writeImage() (eout error) {
 
 func openLineImage(path string) (image.Image, error) {
 	imgpath := path
-	if pos := strings.Index(path, "."); pos != -1 {
-		imgpath = path[0:pos]
+	for ext := filepath.Ext(imgpath); ext != ""; ext = filepath.Ext(imgpath) {
+		imgpath = imgpath[0 : len(imgpath)-len(ext)]
 	}
 	for _, ext := range []string{".bin.png", ".dew.png", ".nrm.png", ".png"} {
 		if _, err := os.Stat(imgpath + ext); err == nil {
