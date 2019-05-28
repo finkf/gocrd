@@ -1,3 +1,3 @@
-module github.com/finkf/boundingbox
+module github.com/finkf/gocrd/boundingbox
 
 go 1.12

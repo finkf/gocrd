@@ -1,4 +1,4 @@
-package boundingbox // import "github.com/finkf/boundingbox"
+package boundingbox // import "github.com/finkf/gocrd/boundingbox"
 
 import (
 	"image"
