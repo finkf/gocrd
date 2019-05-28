@@ -1,4 +1,4 @@
-package page
+package page // import "github.com/finkf/gocrd/xml/page"
 
 import (
 	"encoding/xml"

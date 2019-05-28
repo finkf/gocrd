@@ -1,0 +1,4 @@
+github.com/finkf/gocrd/boundingbox v0.1.2 h1:CMuSdsUi8VZnPSXRAWt1gRybVUOpOSm/jA8WIfkuLxU=
+github.com/finkf/gocrd/boundingbox v0.1.2/go.mod h1:nXrXaCTgiTr9T3ZSoAZNd+38XDy06MKaT1oD9DR7moM=
+github.com/finkf/gocrd/xml/hocr v0.1.1 h1:lCz2EAYBIlc6kJFn7iXIHNmaFB2c/OU2Lcy4unUctRI=
+github.com/finkf/gocrd/xml/hocr v0.1.1/go.mod h1:/O/Bd/P++3h7QwdPgU/QAaMzqJl9CvrJUUOYtAuEbi0=
