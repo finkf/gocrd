@@ -1,6 +1,8 @@
 package page
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
 	"image"
 	"testing"
@@ -70,6 +72,15 @@ func TestBoundingBox(t *testing.T) {
 			t.Run(fmt.Sprintf("%s", tc.want), func(t *testing.T) {
 				want("%s", boundingbox.FromPoints(tc.test.Points), tc.want, t)
 			})
+		}
+	})
+}
+
+func TestMarshallPcGts(t *testing.T) {
+	withOpenPcGts(testfile, func(p *PcGts) {
+		var buf bytes.Buffer
+		if err := xml.NewEncoder(&buf).Encode(p); err != nil {
+			t.Fatalf("cannot marshall pcgts to xml: %v", err)
 		}
 	})
 }
