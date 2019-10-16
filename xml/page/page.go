@@ -171,11 +171,19 @@ type RegionRefIndexed struct {
 // TextRegionBase defines the base data structure for
 // all text regions (TextRegion, Line, Word, Glyph) in a page XML document.
 type TextRegionBase struct {
-	ID        string `xml:"id,attr"`
-	Custom    string `xml:"custom,attr"`
-	Coords    Coords
-	TextStyle TextStyle
-	TextEquiv TextEquiv // TODO: multiple TextEquivs are allowed
+	ID               string `xml:"id,attr"`
+	Custom           string `xml:"custom,attr"`
+	Coords           Coords
+	TextStyle        TextStyle
+	TextEquiv        TextEquiv         // TODO: multiple TextEquivs are allowed
+	AlternativeImage *AlternativeImage `xml:"AlternativeImage,omitempty"`
+}
+
+// AlternativeImage defines optional alternative image information.
+type AlternativeImage struct {
+	Filename string  `xml:"filename,attr"`
+	Comments string  `xml:"comments,attr"`
+	Conf     float64 `xml:"conf,attr"`
 }
 
 // TextRegion is a region of text (paragraph, block, ...)
